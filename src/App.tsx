@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route} from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { FormProvider } from './Context/ContextRevisao' // Import your FormProvider
 import { Home } from './Pages/Home'
 import { Login } from './Pages/Login'
 import { List } from './Pages/List'
@@ -14,20 +15,23 @@ import { StepFive } from './Pages/NewOccurrence/Step5'
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/list" element={<List />} />
-        <Route path="/new-occurrence" element={<NewOccurrence />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/steptwo" element={<StepTwo/>} />
-        <Route path="/stepthree" element={<StepThree/>} />
-        <Route path="/stepfour" element={<StepFour/>} />
-        <Route path="/stepfive" element={<StepFive/>} />
-        <Route path="*" element={<h1>404 - Página não encontrada</h1>} />
-      </Routes>
+      {/* Wrap Routes to provide form context to all steps */}
+      <FormProvider>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/list" element={<List />} />
+          <Route path="/new-occurrence" element={<NewOccurrence />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/steptwo" element={<StepTwo/>} />
+          <Route path="/stepthree" element={<StepThree/>} />
+          <Route path="/stepfour" element={<StepFour/>} />
+          <Route path="/stepfive" element={<StepFive/>} />
+          <Route path="*" element={<h1>404 - Página não encontrada</h1>} />
+        </Routes>
+      </FormProvider>
     </BrowserRouter>
   )
 }

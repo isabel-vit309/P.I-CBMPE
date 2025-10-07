@@ -7,7 +7,7 @@ import { Input } from './Input';
 
 export function Sidebar() {
   return (
-    <aside className='border-r border-zinc-200 shadow-lg p-4'>
+    <aside className='border-r border-zinc-200 shadow-lg p-4 h-screen sticky top-0'>
       <Logo />
       <div className='flex items-center mt-4 ml-16 space-x-4'>
         <div className='flex w-12 h-12 bg-input rounded-full items-center justify-center text-zinc-500'>
