@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
+@import "tw-animate-css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+

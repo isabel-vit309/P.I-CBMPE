@@ -32,16 +32,28 @@ export function StepFive() {
             text-sm lg:text-base mt-4 md:mt-0
           "
         >
-          <NavLink to="/home" className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors">
+          <NavLink
+            to="/home"
+            className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors"
+          >
             <span>Início</span>
           </NavLink>
-          <NavLink to="/list" className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors">
+          <NavLink
+            to="/list"
+            className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors"
+          >
             <span>Lista de Ocorrência</span>
           </NavLink>
-          <NavLink to="/profile" className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors">
+          <NavLink
+            to="/profile"
+            className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors"
+          >
             <span>Perfil</span>
           </NavLink>
-          <NavLink to="/settings" className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors">
+          <NavLink
+            to="/settings"
+            className="flex items-center gap-2 text-zinc-700 hover:text-primary transition-colors"
+          >
             <span>Configurações</span>
           </NavLink>
         </nav>
@@ -83,7 +95,11 @@ export function StepFive() {
           "
         >
           Sua ocorrência foi registrada com sucesso! Você pode administrá-la na
-          página <span className="font-semibold text-primary">Lista de Ocorrências</span>.
+          página{" "}
+          <span className="font-semibold text-primary">
+            Lista de Ocorrências
+          </span>
+          .
         </p>
 
         <button
@@ -106,16 +122,28 @@ export function StepFive() {
           bg-white fixed bottom-0 left-0 w-full
         "
       >
-        <NavLink to="/home" className="text-sm text-zinc-700 hover:text-primary">
+        <NavLink
+          to="/home"
+          className="text-sm text-zinc-700 hover:text-primary"
+        >
           Início
         </NavLink>
-        <NavLink to="/list" className="text-sm text-zinc-700 hover:text-primary">
+        <NavLink
+          to="/list"
+          className="text-sm text-zinc-700 hover:text-primary"
+        >
           Lista
         </NavLink>
-        <NavLink to="/profile" className="text-sm text-zinc-700 hover:text-primary">
+        <NavLink
+          to="/profile"
+          className="text-sm text-zinc-700 hover:text-primary"
+        >
           Perfil
         </NavLink>
-        <NavLink to="/settings" className="text-sm text-zinc-700 hover:text-primary">
+        <NavLink
+          to="/settings"
+          className="text-sm text-zinc-700 hover:text-primary"
+        >
           Config.
         </NavLink>
       </nav>

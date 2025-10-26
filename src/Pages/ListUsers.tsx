@@ -1,38 +1,27 @@
 import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Components/Sidebar";
-import { Trash2, Menu } from "lucide-react";
-import { useState } from "react";
+import { Trash2 } from "lucide-react";
 
 const ocorrencias = [
   {
     id: 1,
     autor: "Jane Doe",
-    cargo: "Senior Designer",
     data: "20/09/25",
-    hora: "10:30",
     cidade: "São Paulo",
-    gravidade: "Alta",
-    situacao: "Pendente",
   },
   {
     id: 2,
     autor: "John Smith",
     cargo: "Tech Lead",
     data: "21/09/25",
-    hora: "11:45",
     cidade: "Rio de Janeiro",
-    gravidade: "Média",
-    situacao: "Em Análise",
   },
   {
     id: 3,
     autor: "Alice Johnson",
     cargo: "Analista BI",
     data: "22/09/25",
-    hora: "14:00",
     cidade: "Curitiba",
-    gravidade: "Baixa",
-    situacao: "Concluído",
   },
   {
     id: 4,
@@ -41,19 +30,17 @@ const ocorrencias = [
     data: "23/09/25",
     hora: "16:15",
     cidade: "Belo Horizonte",
-    gravidade: "Alta",
-    situacao: "Pendente",
   },
 ];
 
-export function List() {
+export function ListUsers() {
   return (
     <div className="min-h-screen grid grid-cols-sidebar">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
           <h1 className="pt-6 pb-2 px-6 text-4xl font-bold text-gray-800">
-            Lista de Ocorrências
+            Lista de Usuários
           </h1>
           <nav className="border-b border-zinc-200 pt-3 flex space-x-6 px-6 text-gray-500">
             <NavLink
@@ -85,25 +72,13 @@ export function List() {
             </NavLink>
           </nav>
         </div>
-
-        {/* Conteúdo */}
         <div className="p-4 md:p-6">
           <div className="bg-white rounded-lg border border-gray-200">
-            {/* Cabeçalho - só no desktop */}
-            <div className="bg-red-600 text-white p-4 hidden md:flex gap-4">
-              <span className="flex-1 text-xs font-semibold">Autor</span>
-              <span className="flex-1 text-xs font-semibold">Data</span>
-              <span className="flex-1 text-xs font-semibold">Hora</span>
-              <span className="flex-1 text-xs font-semibold">Cidade</span>
-              <span className="flex-1 text-xs font-semibold">Gravidade</span>
-              <span className="flex-1 text-xs font-semibold">Situação</span>
-            </div>
+            <div className="bg-red-600 text-white p-4 hidden md:flex gap-4 h-14"></div>
 
-            {/* Lista */}
             <div className="divide-y divide-gray-200">
               {ocorrencias.map((ocorrencia) => (
                 <div key={ocorrencia.id} className="p-4 hover:bg-gray-50">
-                  {/* Desktop */}
                   <div className="hidden md:flex gap-4 items-center">
                     <span className="flex-1">
                       <p className="font-medium text-gray-900">
@@ -112,26 +87,10 @@ export function List() {
                       <p className="text-gray-500">{ocorrencia.cargo}</p>
                     </span>
                     <span className="flex-1 text-gray-800">
-                      {ocorrencia.data}
-                    </span>
-                    <span className="flex-1 text-gray-800">
-                      {ocorrencia.hora}
-                    </span>
-                    <span className="flex-1 text-gray-800">
                       {ocorrencia.cidade}
-                    </span>
-                    <span className="flex-1 text-gray-800">
-                      {ocorrencia.gravidade}
-                    </span>
-                    <span className="flex-1">
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-200">
-                        {ocorrencia.situacao}
-                      </span>
                     </span>
                     <Trash2 className="h-5 w-5 text-gray-400" />
                   </div>
-
-                  {/* Mobile */}
                   <div className="md:hidden space-y-3">
                     <div className="flex justify-between">
                       <div>
@@ -156,17 +115,6 @@ export function List() {
                         <span className="text-gray-500">Cidade:</span>{" "}
                         {ocorrencia.cidade}
                       </div>
-                      <div>
-                        <span className="text-gray-500">Gravidade:</span>{" "}
-                        {ocorrencia.gravidade}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Situação:</span>
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-200">
-                        {ocorrencia.situacao}
-                      </span>
                     </div>
                   </div>
                 </div>

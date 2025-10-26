@@ -1,11 +1,11 @@
-// src/pages/StepThree.tsx
-
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { RegisterField } from "../../Components/RegisterField";
-import { Whitelogo } from "../../Components/WhiteLogo";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { useFormContext } from "../../Context/ContextRevisao";
+import { Sidebar } from "../../Components/Sidebar";
+import { NavLink } from "react-router-dom";
+import { Input } from "../../Components/Input";
 
 interface StepThreeForm {
   name: string;
@@ -18,193 +18,183 @@ export function StepThree() {
   const navigate = useNavigate();
   const { updateFormData, formData } = useFormContext();
 
-  const { 
-    register, 
-    handleSubmit, 
+  const {
+    register,
+    handleSubmit,
     formState: { errors },
-    reset 
+    reset,
   } = useForm<StepThreeForm>();
 
   useEffect(() => {
     if (formData.step3) {
       reset(formData.step3);
     }
-  }, [formData.step3, reset]); 
+  }, [formData.step3, reset]);
 
   const onSubmit = (data: StepThreeForm) => {
-    updateFormData('step3', data);
-    navigate('/stepfour');
+    updateFormData("step3", data);
+    navigate("/stepfour");
   };
 
   const handleBack = () => {
-    navigate('/steptwo');
+    navigate("/steptwo");
   };
 
-  // 🔹 Tornamos o input flexível e fluido em todas as telas
-  const inputWidthClass =
-    "w-full sm:w-full md:max-w-[500px] lg:max-w-[560px] xl:max-w-[600px] 2xl:max-w-[620px]";
-
   return (
-    <div
-      className="
-        min-h-screen flex flex-col items-center
-        xl:grid xl:grid-cols-[minmax(300px,340px)_minmax(0,1fr)]
-        2xl:grid-cols-[348px_minmax(0,1fr)]
-        gap-6 px-4 py-8 xl:px-8
-        overflow-hidden
-      "
-    >
-      {/* SIDEBAR */}
-      <div
-        className="
-          bg-primary rounded-lg hidden xl:block
-          w-full xl:w-[320px] 2xl:w-[348px]
-          mt-4 2xl:mt-20
-          min-h-[600px] 2xl:h-[880px]
-          shrink-0
-        "
-      >
-        <div className="flex justify-center pt-8">
-          <Whitelogo className="w-32 h-32" />
-        </div>
-        <div className="border-b border-white mx-auto w-3/4 my-4" />
-        <div className="mt-8 2xl:mt-20 px-4">
-          <RegisterField stepNumber={1} title="Dados principais" description="Informações essenciais sobre a ocorrência." />
-          <RegisterField stepNumber={2} title="Dados Complementares" description="Informações que vão ajudar a entender o caso em geral." />
-          <RegisterField stepNumber={3} title="Identificação" description="Momento para registrarmos quem está passando as informações." />
-          <RegisterField stepNumber={4} title="Revisão" description="Hora de olhar todas as informações e ter certeza que está tudo correto antes do envio." />
+    <div className="min-h-screen grid grid-cols-sidebar">
+      <Sidebar />
+      <div className="flex-1 bg-gray-50">
+        <div className="p-0">
+          <h1 className="pt-6 pb-2 px-6 text-4xl font-bold text-gray-800">
+            Registrar Ocorrência
+          </h1>
+          <nav className="border-b border-zinc-200 pt-3 flex space-x-6 px-6 text-gray-500">
+            <NavLink
+              to="/home"
+              className="font-medium text-base py-3 text-gray-900 border-b-2 hover:text-red-600"
+            >
+              Início
+            </NavLink>
+            <NavLink
+              to="/new-occurrence"
+              className="font-medium text-base py-3 border-b border-red-600"
+            >
+              Registrar ocorrência
+            </NavLink>
+            <NavLink
+              to="/registeruser"
+              className="font-medium text-base py-3 hover:text-red-600 "
+            >
+              Registrar Usuário
+            </NavLink>
+            <NavLink
+              to="/list"
+              className="font-medium text-base py-3 hover:text-red-600"
+            >
+              Lista de ocorrências
+            </NavLink>
+            <NavLink to="#" className="font-medium text-red-600 py-3">
+              Admin
+            </NavLink>
+          </nav>
+          <div className="mt-9 flex items-center justify-center">
+            <RegisterField stepNumber={1} status="active" />
+            <div className="border-b border-2 border-black w-96" />
+            <RegisterField stepNumber={2} status="active" />
+            <div className="border-b border-2 border-black w-96" />
+            <RegisterField stepNumber={3} status="active" />
+            <div className="border-b border-2 border-black w-96" />
+            <RegisterField stepNumber={4} status="inactive" />
+          </div>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="w-full min-h-[500px] 2xl:h-[800px] mt-4 flex justify-center"
+          >
+            <div className="w-full max-h-[460px] mt-8 shadow-lg bg-white rounded-3xl p-6 xl:p-8 2xl:p-10 max-w-[calc(100vw-360px)] xl:max-w-[calc(100vw-500px)] 2xl:max-w-[1391px]">
+              <h1 className="font-semibold font-roboto text-3xl ml-4">
+                Identificação
+              </h1>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="mb-4">
+                  <Input
+                    title="Nome"
+                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    placeholder="Digite seu nome completo"
+                    {...register("name", {
+                      required: "Nome é obrigatório",
+                      minLength: {
+                        value: 3,
+                        message: "Nome deve ter pelo menos 3 caracteres",
+                      },
+                      pattern: {
+                        value: /^[A-Za-zÀ-ÿ\s]+$/,
+                        message: "Nome deve conter apenas letras",
+                      },
+                    })}
+                    error={errors.name?.message}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    title="Código de Identificação"
+                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    placeholder="Digite seu código de identificação"
+                    {...register("identificationCode", {
+                      required: "Código de identificação é obrigatório",
+                      minLength: {
+                        value: 3,
+                        message: "Código deve ter pelo menos 3 caracteres",
+                      },
+                      pattern: {
+                        value: /^[A-Z0-9-]+$/,
+                        message:
+                          "Código deve conter apenas letras maiúsculas, números e hífens",
+                      },
+                    })}
+                    error={errors.identificationCode?.message}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div>
+                  <Input
+                    title="CPF"
+                    placeholder="Digite seu CPF"
+                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    {...register("cpf", {
+                      required: "CPF é obrigatório",
+                      pattern: {
+                        value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+                        message: "CPF deve estar no formato 000.000.000-00",
+                      },
+                      minLength: {
+                        value: 14,
+                        message: "CPF deve ter 14 caracteres",
+                      },
+                      maxLength: {
+                        value: 14,
+                        message: "CPF deve ter 14 caracteres",
+                      },
+                    })}
+                    error={errors.cpf?.message}
+                  />
+                </div>
+
+                <div>
+                  <Input
+                    title="Telefone"
+                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    placeholder="Digite seu telefone"
+                    {...register("phone", {
+                      required: "Telefone é obrigatório",
+                    })}
+                    error={errors.phone?.message}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-between mt-10">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="bg-gray-500 text-white rounded-xl w-full max-w-xs xl:w-[150px] h-10 transition-transform hover:scale-[1.02]"
+                >
+                  Voltar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-primary text-white rounded-xl w-full max-w-xs xl:w-[150px] h-10 transition-transform hover:scale-[1.02]"
+                >
+                  Continuar
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
-
-      {/* FORMULÁRIO */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full flex justify-center overflow-x-hidden"
-      >
-        <div
-          className="
-            w-full h-auto shadow-lg bg-white rounded-3xl
-            p-4 sm:p-6 xl:p-8 2xl:p-10
-            max-w-full sm:max-w-[calc(100vw-60px)]
-            xl:max-w-[calc(100vw-400px)] 2xl:max-w-[1391px]
-            transition-all duration-200 ease-in-out
-          "
-        >
-          <h1 className="font-bold font-roboto text-2xl md:text-3xl mb-6">
-            Identificação
-          </h1>
-
-          {/* GRUPO 1 */}
-          <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-10">
-            <div className="mt-4 flex-1 min-w-[250px]">
-              <label className="font-semibold">Nome</label>
-              <input
-                type="text"
-                className={`border border-zinc-300 h-10 rounded-xl pl-3 mt-2 ${inputWidthClass}`}
-                placeholder="Digite seu nome completo"
-                {...register("name", {
-                  required: "Nome é obrigatório",
-                  minLength: { value: 2, message: "Nome deve ter pelo menos 2 caracteres" },
-                })}
-              />
-              {errors.name && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.name.message}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-4 flex-1 min-w-[250px]">
-              <label className="font-semibold">Código de identificação*</label>
-              <input
-                type="text"
-                className={`border border-zinc-300 h-10 rounded-xl pl-3 mt-2 ${inputWidthClass}`}
-                placeholder="Digite seu código"
-                {...register("identificationCode", {
-                  required: "Código de identificação é obrigatório",
-                  minLength: { value: 3, message: "Código deve ter pelo menos 3 caracteres" },
-                })}
-              />
-              {errors.identificationCode && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.identificationCode.message}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* GRUPO 2 */}
-          <div className="flex flex-col md:flex-row md:flex-wrap md:gap-x-10">
-            <div className="mt-4 flex-1 min-w-[250px]">
-              <label className="font-semibold">CPF</label>
-              <input
-                type="text"
-                className={`border border-zinc-300 h-10 rounded-xl pl-3 mt-2 ${inputWidthClass}`}
-                placeholder="000.000.000-00"
-                {...register("cpf", {
-                  required: "CPF é obrigatório",
-                  pattern: {
-                    value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-                    message: "Digite um CPF válido (000.000.000-00)",
-                  },
-                })}
-              />
-              {errors.cpf && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.cpf.message}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-4 flex-1 min-w-[250px]">
-              <label className="font-semibold">Telefone</label>
-              <input
-                type="tel"
-                className={`border border-zinc-300 h-10 rounded-xl pl-3 mt-2 ${inputWidthClass}`}
-                placeholder="(81) 98844-3569 ou 81988443569"
-                {...register("phone", {
-                  required: "Telefone é obrigatório",
-                  pattern: {
-                    value: /^(\(?\d{2}\)?[\s-]?)?\d{4,5}[\s-]?\d{4}$/,
-                    message: "Digite um telefone válido (Ex: (81) 98844-3569 ou 81988443569)",
-                  },
-                })}
-              />
-              {errors.phone && (
-                <span className="text-red-500 text-sm mt-1 block">
-                  {errors.phone.message}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* BOTÕES */}
-          <div className="flex flex-col xl:flex-row justify-between mt-10 gap-4 xl:gap-0">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="
-                bg-gray-500 text-white rounded-xl
-                w-full max-w-xs xl:w-[150px] h-10
-                transition-transform hover:scale-[1.02]
-              "
-            >
-              Voltar
-            </button>
-
-            <button
-              type="submit"
-              className="
-                bg-primary text-white rounded-xl
-                w-full max-w-xs xl:w-[150px] h-10
-                transition-transform hover:scale-[1.02]
-              "
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
-      </form>
     </div>
   );
 }
