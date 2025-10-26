@@ -42,65 +42,70 @@ export function StepTwo() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-sidebar">
+    <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
-          <h1 className="pt-6 pb-2 px-6 text-4xl font-bold text-gray-800">
+          <h1 className="ml-12 -mt-1.5 lg:ml-0 lg:mt-0 pt-6 pb-2 px-4 md:px-6 text-xl md:text-2xl lg:text-4xl font-bold text-gray-800">
             Registrar Ocorrência
           </h1>
-          <nav className="border-b border-zinc-200 pt-3 flex space-x-6 px-6 text-gray-500">
+          <nav className="border-b border-zinc-200 pt-3 flex space-x-3 md:space-x-4 lg:space-x-6 px-4 md:px-6 text-gray-500 overflow-x-auto">
             <NavLink
               to="/home"
-              className="font-medium text-base py-3 text-gray-900 border-b-2 hover:text-red-600"
+              className="font-medium text-xs md:text-sm lg:text-base py-3 text-gray-900 border-b-2 hover:text-red-600 whitespace-nowrap"
             >
               Início
             </NavLink>
             <NavLink
               to="/new-occurrence"
-              className="font-medium text-base py-3 border-b border-red-600"
+              className="font-medium text-xs md:text-sm lg:text-base py-3 border-b border-red-600 whitespace-nowrap"
             >
               Registrar ocorrência
             </NavLink>
             <NavLink
               to="/registeruser"
-              className="font-medium text-base py-3 hover:text-red-600 "
+              className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
             >
               Registrar Usuário
             </NavLink>
             <NavLink
               to="/list"
-              className="font-medium text-base py-3 hover:text-red-600"
+              className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink to="#" className="font-medium text-red-600 py-3">
+            <NavLink
+              to="#"
+              className="font-medium text-xs md:text-sm lg:text-base text-red-600 py-3 whitespace-nowrap"
+            >
               Admin
             </NavLink>
           </nav>
-          <div className="mt-9 flex items-center justify-center">
+
+          <div className="hidden lg:flex mt-9 items-center justify-center px-4">
             <RegisterField stepNumber={1} status="active" />
-            <div className="border-b border-2 border-black w-96" />
+            <div className="border-b border-2 border-black w-32 xl:w-96" />
             <RegisterField stepNumber={2} status="active" />
-            <div className="border-b border-2 border-black w-96" />
+            <div className="border-b border-2 border-black w-32 xl:w-96" />
             <RegisterField stepNumber={3} status="inactive" />
-            <div className="border-b border-2 border-black w-96" />
+            <div className="border-b border-2 border-black w-32 xl:w-96" />
             <RegisterField stepNumber={4} status="inactive" />
           </div>
+
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full min-h-[500px] 2xl:h-[800px] mt-4 flex justify-center"
+            className="w-full min-h-[400px] md:min-h-[500px] mt-4 flex justify-center px-2 md:px-4"
           >
-            <div className="w-full max-h-[450px] mt-8 shadow-lg bg-white rounded-3xl p-6 xl:p-8 2xl:p-10 max-w-[calc(100vw-360px)] xl:max-w-[calc(100vw-500px)] 2xl:max-w-[1391px]">
-              <h1 className="font-semibold font-roboto text-3xl ml-4">
+            <div className="w-full mt-4 md:mt-8 lg:bg-white lg:rounded-3xl p-3 md:p-4 lg:p-6 xl:p-8 max-w-2xl lg:max-w-4xl lg:shadow-lg">
+              <h1 className="font-semibold font-roboto text-lg md:text-xl lg:text-2xl xl:text-3xl">
                 Dados Complementares
               </h1>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div className="mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6">
+                <div>
                   <Input
                     title="Descrição do Caso"
-                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    inputClassName="rounded-2xl"
                     placeholder="Descreva o caso ocorrido"
                     {...register("caseDescription", {
                       required: "Descrição do caso é obrigatória",
@@ -120,7 +125,7 @@ export function StepTwo() {
                 <div>
                   <Input
                     title="Recursos Utilizados"
-                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    inputClassName="rounded-2xl"
                     placeholder="Ex: Viaturas, Equipamentos"
                     {...register("resourcesUsed", {
                       required: "Recursos utilizados são obrigatórios",
@@ -138,12 +143,12 @@ export function StepTwo() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <div className="mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6 lg:mt-8">
+                <div>
                   <Input
                     title="Número de Vítimas"
                     placeholder="Digite a quantidade de vítimas"
-                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    inputClassName="rounded-2xl"
                     type="number"
                     {...register("victimsNumber", {
                       required: "Número de vítimas é obrigatório",
@@ -168,7 +173,7 @@ export function StepTwo() {
                 <div>
                   <Input
                     title="Endereço de Ocorrência"
-                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
+                    inputClassName="rounded-2xl"
                     placeholder="Ex: Rua, Avenida, Praça"
                     {...register("occurrenceAddress", {
                       required: "Endereço de ocorrência é obrigatório",
@@ -186,41 +191,39 @@ export function StepTwo() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 mt-10">
-                <div>
-                  <Input
-                    title="Situação Final"
-                    className="w-full border border-zinc-300 h-10 rounded-xl bg-white"
-                    placeholder="Informe a situação final"
-                    {...register("finalSituation", {
-                      required: "Situação final é obrigatória",
-                      minLength: {
-                        value: 5,
-                        message:
-                          "Situação final deve ter pelo menos 5 caracteres",
-                      },
-                      maxLength: {
-                        value: 300,
-                        message:
-                          "Situação final deve ter no máximo 300 caracteres",
-                      },
-                    })}
-                    error={errors.finalSituation?.message}
-                  />
-                </div>
+              <div className="mt-4 md:mt-6 lg:mt-10">
+                <Input
+                  title="Situação Final"
+                  inputClassName="rounded-2xl"
+                  placeholder="Informe a situação final"
+                  {...register("finalSituation", {
+                    required: "Situação final é obrigatória",
+                    minLength: {
+                      value: 5,
+                      message:
+                        "Situação final deve ter pelo menos 5 caracteres",
+                    },
+                    maxLength: {
+                      value: 300,
+                      message:
+                        "Situação final deve ter no máximo 300 caracteres",
+                    },
+                  })}
+                  error={errors.finalSituation?.message}
+                />
               </div>
 
-              <div className="flex justify-between mt-10">
+              <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 mt-4 md:mt-6 lg:mt-10">
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="bg-gray-500 text-white rounded-xl w-full max-w-xs xl:w-[150px] h-10 transition-transform hover:scale-[1.02]"
+                  className="bg-gray-500 text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-transform hover:scale-[1.02] text-sm md:text-base order-2 md:order-1"
                 >
                   Voltar
                 </button>
                 <button
                   type="submit"
-                  className="bg-primary text-white rounded-xl w-full max-w-xs xl:w-[150px] h-10 transition-transform hover:scale-[1.02]"
+                  className="bg-primary text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-transform hover:scale-[1.02] text-sm md:text-base order-1 md:order-2"
                 >
                   Continuar
                 </button>

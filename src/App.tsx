@@ -5,7 +5,6 @@ import { Login } from "./Pages/Login";
 import { List } from "./Pages/List";
 import { NewOccurrence } from "./Pages/NewOccurrence";
 import { Profile } from "./Pages/Profile";
-import { Register } from "./Pages/Register";
 import { Settings } from "./Pages/Settings";
 import { StepTwo } from "./Pages/NewOccurrence/Step2";
 import { StepThree } from "./Pages/NewOccurrence/Step3";
@@ -26,7 +25,6 @@ function App() {
           <Route path="/registeruser" element={<RegisterUser />} />
           <Route path="/new-occurrence" element={<NewOccurrence />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/steptwo" element={<StepTwo />} />
           <Route path="/stepthree" element={<StepThree />} />

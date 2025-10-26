@@ -103,52 +103,53 @@ const BarCustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
 export function Home() {
   return (
-    <div className="min-h-screen grid grid-cols-sidebar">
+    <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
-          <h1 className="pt-6 pb-2 px-6 text-4xl font-bold text-gray-800">
-            Registrar Usuário
+          <h1 className="ml-10 -mt-1.5 lg:ml-0 pt-6 pb-2 px-6 text-2xl md:text-4xl font-bold text-gray-800">
+            Dashboard
           </h1>
-          <nav className="border-b border-zinc-200 pt-3 flex space-x-6 px-6 text-gray-500">
+          <nav className="border-b border-zinc-200 pt-3 flex space-x-4 px-6 text-gray-500 overflow-x-auto">
             <NavLink
               to="/home"
-              className="font-medium text-base py-3 text-gray-900  border-b border-red-600"
+              className="font-medium text-sm py-3 text-gray-900 border-b border-red-600 whitespace-nowrap"
             >
               Início
             </NavLink>
             <NavLink
               to="/new-occurrence"
-              className="font-medium text-base py-3 hover:text-red-600"
+              className="font-medium text-sm py-3 hover:text-red-600 whitespace-nowrap"
             >
               Registrar ocorrência
             </NavLink>
             <NavLink
               to="/registeruser"
-              className="font-medium text-base py-3 border-b hover:text-red-600"
+              className="font-medium text-sm py-3 border-b hover:text-red-600 whitespace-nowrap"
             >
               Registrar Usuário
             </NavLink>
             <NavLink
               to="/list"
-              className="font-medium text-base py-3 hover:text-red-600"
+              className="font-medium text-sm py-3 hover:text-red-600 whitespace-nowrap"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink to="#" className="font-medium text-red-600 py-3">
+            <NavLink
+              to="#"
+              className="font-medium text-red-600 py-3 whitespace-nowrap"
+            >
               Admin
             </NavLink>
           </nav>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 px-6 py-4 w-full">
-          <Card className="h-[410px]">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-4 px-4 py-4 w-full">
+          <Card className="w-full">
             <CardHeader className="pb-2">
-              <CardTitle className="text-2xl mt-4 mb-2">
-                Taxa de danos
-              </CardTitle>
+              <CardTitle className="text-xl mt-4 mb-2">Taxa de danos</CardTitle>
 
-              <div className="flex gap-6">
+              <div className="flex gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded bg-[#E10643]" />
                   <span className="text-sm font-medium">Urbana</span>
@@ -161,77 +162,79 @@ export function Home() {
             </CardHeader>
 
             <CardContent className="flex flex-col items-center">
-              <PieChart width={500} height={320}>
-                <Pie
-                  data={data}
-                  startAngle={180}
-                  endAngle={0}
-                  innerRadius={90}
-                  outerRadius={160}
-                  paddingAngle={2}
-                  dataKey="value"
-                  labelLine={false}
-                >
-                  {data.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<PieCustomTooltip />} />
-              </PieChart>
+              <div className="w-full max-w-[300px]">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={data}
+                      startAngle={180}
+                      endAngle={0}
+                      innerRadius={70}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="value"
+                      labelLine={false}
+                    >
+                      {data.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<PieCustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
 
-              <div className="-mt-24 text-2xl font-bold text-gray-700">67%</div>
+              <div className="-mt-16 text-xl font-bold text-gray-700">67%</div>
             </CardContent>
           </Card>
 
-          <Card className="h-[410px]">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle className="text-2xl">Ocorrências Mensais</CardTitle>
+              <CardTitle className="text-xl">Ocorrências Mensais</CardTitle>
               <p className="text-sm text-gray-500">
                 Evolução do número de ocorrências no ano
               </p>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={320}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={lineData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip content={<LineCustomTooltip />} />
                   <Line
                     type="monotone"
                     dataKey="ocorrencias"
                     stroke="#E10643"
                     strokeWidth={3}
-                    dot={{ fill: "#E10643", strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, fill: "#E10643" }}
+                    dot={{ fill: "#E10643", strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5, fill: "#E10643" }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </div>
 
-        <div className="grid grid-cols-2 gap-6 px-6 py-4 w-full">
-          <Card className="h-[450px]">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle className="text-2xl">Maiores Incidentes</CardTitle>
+              <CardTitle className="text-xl">Maiores Incidentes</CardTitle>
               <p className="text-sm text-gray-500">
                 Tipos de incidentes com maior número de ocorrências
               </p>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={barData} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis
                     type="category"
                     dataKey="incidente"
-                    width={150}
-                    tick={{ fontSize: 12 }}
+                    width={100}
+                    tick={{ fontSize: 10 }}
                   />
                   <Tooltip content={<BarCustomTooltip />} />
                   <Bar
@@ -244,10 +247,10 @@ export function Home() {
             </CardContent>
           </Card>
 
-          <Card className="h-[450px]">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle className="text-2xl mb-2 mt-4">
-                Bairros com Mais Incidentes Registrados
+              <CardTitle className="text-xl mb-2 mt-4">
+                Bairros com Mais Incidentes
               </CardTitle>
               <p className="text-sm text-gray-500">
                 Áreas de maior risco na região
@@ -272,12 +275,12 @@ export function Home() {
                             : "bg-gray-300"
                         }`}
                       />
-                      <span className="font-medium text-gray-800">
+                      <span className="font-medium text-gray-800 text-sm">
                         {item.bairro}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-red-600">
+                      <span className="text-base font-bold text-red-600">
                         {item.probabilidade}%
                       </span>
                     </div>

@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Components/Sidebar";
-import { Trash2, Menu } from "lucide-react";
-import { useState } from "react";
+import { Trash2 } from "lucide-react";
 
 const ocorrencias = [
   {
@@ -48,63 +47,62 @@ const ocorrencias = [
 
 export function List() {
   return (
-    <div className="min-h-screen grid grid-cols-sidebar">
+    <div className="min-h-screen flex">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
-          <h1 className="pt-6 pb-2 px-6 text-4xl font-bold text-gray-800">
+          <h1 className="ml-12 -mt-1.5 lg:ml-0 lg:mt-0 pt-6 pb-2 px-4 md:px-6 text-2xl md:text-4xl font-bold text-gray-800">
             Lista de Ocorrências
           </h1>
-          <nav className="border-b border-zinc-200 pt-3 flex space-x-6 px-6 text-gray-500">
+          <nav className="border-b border-zinc-200 pt-3 flex space-x-4 md:space-x-6 px-4 md:px-6 text-gray-500 overflow-x-auto">
             <NavLink
               to="/home"
-              className="font-medium text-base py-3 text-gray-900 hover:text-red-600"
+              className="font-medium text-sm md:text-base py-3 text-gray-900 hover:text-red-600 whitespace-nowrap"
             >
               Início
             </NavLink>
             <NavLink
               to="/new-occurrence"
-              className="font-medium text-base py-3 hover:text-red-600"
+              className="font-medium text-sm md:text-base py-3 hover:text-red-600 whitespace-nowrap"
             >
               Registrar ocorrência
             </NavLink>
             <NavLink
               to="/registeruser"
-              className="font-medium text-base py-3 border-b hover:text-red-600"
+              className="font-medium text-sm md:text-base py-3 border-b hover:text-red-600 whitespace-nowrap"
             >
               Registrar Usuário
             </NavLink>
             <NavLink
               to="/list"
-              className="font-medium text-base py-3 border-b border-red-600"
+              className="font-medium text-sm md:text-base py-3 border-b border-red-600 whitespace-nowrap"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink to="#" className="font-medium text-red-600 py-3">
+            <NavLink
+              to="#"
+              className="font-medium text-sm text-red-600 py-3 whitespace-nowrap"
+            >
               Admin
             </NavLink>
           </nav>
         </div>
-
-        {/* Conteúdo */}
         <div className="p-4 md:p-6">
-          <div className="bg-white rounded-lg border border-gray-200">
-            {/* Cabeçalho - só no desktop */}
-            <div className="bg-red-600 text-white p-4 hidden md:flex gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+            <div className="bg-red-600 text-white p-4 hidden md:flex gap-4 min-w-[800px]">
               <span className="flex-1 text-xs font-semibold">Autor</span>
               <span className="flex-1 text-xs font-semibold">Data</span>
               <span className="flex-1 text-xs font-semibold">Hora</span>
               <span className="flex-1 text-xs font-semibold">Cidade</span>
               <span className="flex-1 text-xs font-semibold">Gravidade</span>
               <span className="flex-1 text-xs font-semibold">Situação</span>
+              <span className="w-5"></span>
             </div>
 
-            {/* Lista */}
             <div className="divide-y divide-gray-200">
               {ocorrencias.map((ocorrencia) => (
                 <div key={ocorrencia.id} className="p-4 hover:bg-gray-50">
-                  {/* Desktop */}
-                  <div className="hidden md:flex gap-4 items-center">
+                  <div className="hidden md:flex gap-4 items-center min-w-[800px]">
                     <span className="flex-1">
                       <p className="font-medium text-gray-900">
                         {ocorrencia.autor}
@@ -130,8 +128,6 @@ export function List() {
                     </span>
                     <Trash2 className="h-5 w-5 text-gray-400" />
                   </div>
-
-                  {/* Mobile */}
                   <div className="md:hidden space-y-3">
                     <div className="flex justify-between">
                       <div>
