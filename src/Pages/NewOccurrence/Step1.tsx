@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useFormContext } from "../../Context/ContextRevisao";
@@ -6,6 +6,7 @@ import { Sidebar } from "../../Components/Sidebar";
 import { NavLink } from "react-router-dom";
 import { Input } from "../../Components/Input";
 import { RegisterField } from "../../Components/RegisterField";
+import { Select } from "../../Components/Select";
 
 interface StepOneForm {
   occurrenceType: string;
@@ -18,6 +19,15 @@ interface StepOneForm {
 export function StepOne() {
   const navigate = useNavigate();
   const { updateFormData, formData } = useFormContext();
+
+  const occurrenceTypes = [
+    { value: "Incendio", label: "Incêndio" },
+    { value: "Alagamento", label: "Alagamento" },
+    { value: "Deslizamento", label: "Deslizamento" },
+    { value: "AcidenteRodoviario", label: "Acidente Rodoviário" },
+    { value: "QuedaArvore", label: "Queda de Árvore" },
+    { value: "Tempestade", label: "Tempestade" },
+  ];
 
   const {
     register,
@@ -38,11 +48,11 @@ export function StepOne() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
-          <h1 className="ml-12 -mt-1.5 lg:ml-0 lg:mt-0 pt-6 pb-2 px-4 md:px-6 text-xl md:text-2xl lg:text-4xl font-bold text-gray-800">
+          <h1 className="ml-12 -mt-1.5 lg:mt-0 lg:ml-0 pt-6 pb-2 px-4 md:px-6 text-xl md:text-2xl lg:text-4xl font-bold text-gray-800">
             Registrar Ocorrência
           </h1>
           <nav className="border-b border-zinc-200 pt-3 flex space-x-3 md:space-x-4 lg:space-x-6 px-4 md:px-6 text-gray-500 overflow-x-auto">
@@ -80,11 +90,11 @@ export function StepOne() {
 
           <div className="hidden lg:flex mt-9 items-center justify-center px-4">
             <RegisterField stepNumber={1} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={2} status="inactive" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={3} status="inactive" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={4} status="inactive" />
           </div>
 
@@ -98,28 +108,24 @@ export function StepOne() {
               </h1>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6">
-                <div>
-                  <Input
+                <div className="pb-3 md:pb-0">
+                  <Select
                     title="Tipo de Ocorrência"
                     inputClassName="rounded-2xl"
-                    placeholder="Ex: Acidente, Incêndio"
+                    placeholder="Selecione o tipo de ocorrência"
+                    options={occurrenceTypes}
                     {...register("occurrenceType", {
                       required: "Tipo de ocorrência é obrigatório",
-                      minLength: {
-                        value: 2,
-                        message:
-                          "Tipo de ocorrência deve ter pelo menos 2 caracteres",
-                      },
-                      pattern: {
-                        value: /^[A-Za-zÀ-ÿ\s]+$/,
-                        message: "Tipo de ocorrência deve conter apenas letras",
+                      validate: {
+                        required: (value) =>
+                          value !== "" || "Selecione um tipo de ocorrência",
                       },
                     })}
                     error={errors.occurrenceType?.message}
                   />
                 </div>
 
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Viatura Responsável"
                     inputClassName="rounded-2xl"
@@ -142,7 +148,7 @@ export function StepOne() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6 lg:mt-8">
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Data"
                     type="date"
@@ -153,17 +159,18 @@ export function StepOne() {
                       validate: {
                         futureDate: (value) => {
                           if (!value) return true;
-                          const selectedDate = new Date(value);
+                          const selectedDate = new Date(value + "T00:00:00");
                           const now = new Date();
-                          return (
-                            selectedDate <= now || "Data não pode ser futura"
+                          const today = new Date(
+                            now.getFullYear(),
+                            now.getMonth(),
+                            now.getDate()
                           );
-                        },
-                        validDate: (value) => {
-                          if (!value) return true;
-                          const selectedDate = new Date(value);
+                          if (isNaN(selectedDate.getTime())) {
+                            return "Data inválida";
+                          }
                           return (
-                            !isNaN(selectedDate.getTime()) || "Data inválida"
+                            selectedDate <= today || "Data não pode ser futura"
                           );
                         },
                       },
@@ -172,7 +179,7 @@ export function StepOne() {
                   />
                 </div>
 
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Grupamentos"
                     inputClassName="rounded-2xl"
@@ -190,7 +197,7 @@ export function StepOne() {
                 </div>
               </div>
 
-              <div className="mt-4 md:mt-6 lg:mt-10">
+              <div className="mt-6 pb-3 md:pb-0 lg:mt-10">
                 <Input
                   title="Tipo de Local"
                   inputClassName="rounded-2xl"

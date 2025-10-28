@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { RegisterField } from "../../Components/RegisterField";
 import { useNavigate } from "react-router-dom";
@@ -122,7 +122,7 @@ export function StepFour() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
@@ -163,17 +163,17 @@ export function StepFour() {
           </nav>
           <div className="hidden lg:flex mt-9 items-center justify-center px-4">
             <RegisterField stepNumber={1} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={2} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={3} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={4} status="active" />
           </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full mt-4 flex justify-center px-2 md:px-4"
+            className="w-full mt-4 flex justify-center px-4 md:px-6 lg:px-8"
           >
             <div className="w-full mb-10 mt-4 md:mt-8 lg:bg-white lg:rounded-3xl p-3 md:p-4 lg:p-6 xl:p-8 max-w-2xl lg:max-w-4xl lg:shadow-lg">
               <div className="mb-6 md:mb-8 p-4 md:p-6 lg:bg-white lg:shadow-lg lg:rounded-2xl">
@@ -224,6 +224,33 @@ export function StepFour() {
                         inputClassName="rounded-2xl"
                         {...register("step1.dateTime", {
                           required: "Data é obrigatória",
+                          validate: {
+                            futureDate: (value) => {
+                              if (!value) return true;
+                              // Cria a data no formato YYYY-MM-DD para evitar problemas de fuso horário
+                              const selectedDate = new Date(
+                                value + "T00:00:00"
+                              );
+                              const now = new Date();
+                              // Zera a hora da data atual para comparação apenas de dia
+                              const today = new Date(
+                                now.getFullYear(),
+                                now.getMonth(),
+                                now.getDate()
+                              );
+
+                              // Verifica se a data é válida
+                              if (isNaN(selectedDate.getTime())) {
+                                return "Data inválida";
+                              }
+
+                              // Verifica se a data não é futura (deve ser menor ou igual a hoje)
+                              return (
+                                selectedDate <= today ||
+                                "Data não pode ser futura"
+                              );
+                            },
+                          },
                         })}
                         error={errors.step1?.dateTime?.message}
                       />
@@ -320,6 +347,10 @@ export function StepFour() {
                       placeholder="Ex: Rua, Avenida, Praça"
                       {...register("step2.occurrenceAddress", {
                         required: "Endereço de ocorrência é obrigatório",
+                        minLength: {
+                          value: 5,
+                          message: "Endereço deve ter pelo menos 5 caracteres",
+                        },
                       })}
                       error={errors.step2?.occurrenceAddress?.message}
                     />
@@ -332,32 +363,55 @@ export function StepFour() {
                       placeholder="Informe a situação final"
                       {...register("step2.finalSituation", {
                         required: "Situação final é obrigatória",
+                        minLength: {
+                          value: 5,
+                          message:
+                            "Situação final deve ter pelo menos 5 caracteres",
+                        },
                       })}
                       error={errors.step2?.finalSituation?.message}
                     />
                   </div>
                 </div>
               </div>
+
               <div className="mb-6 md:mb-8 p-4 md:p-6 lg:bg-white lg:shadow-lg lg:rounded-2xl">
                 <h1 className="font-semibold font-roboto text-lg md:text-xl lg:text-2xl mb-4 md:mb-6">
                   Identificação
                 </h1>
 
                 <div className="space-y-6 md:space-y-8 lg:space-y-10 pt-2">
-                  <div>
-                    <Input
-                      title="Nome"
-                      inputClassName="rounded-2xl"
-                      placeholder="Digite seu nome completo"
-                      {...register("step3.name", {
-                        required: "Nome é obrigatório",
-                        minLength: {
-                          value: 3,
-                          message: "Nome deve ter pelo menos 3 caracteres",
-                        },
-                      })}
-                      error={errors.step3?.name?.message}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div>
+                      <Input
+                        title="Nome"
+                        inputClassName="rounded-2xl"
+                        placeholder="Digite seu nome completo"
+                        {...register("step3.name", {
+                          required: "Nome é obrigatório",
+                          minLength: {
+                            value: 3,
+                            message: "Nome deve ter pelo menos 3 caracteres",
+                          },
+                        })}
+                        error={errors.step3?.name?.message}
+                      />
+                    </div>
+                    <div>
+                      <Input
+                        title="Código de Identificação"
+                        inputClassName="rounded-2xl"
+                        placeholder="Digite seu código de identificação"
+                        {...register("step3.identificationCode", {
+                          required: "Código de identificação é obrigatório",
+                          minLength: {
+                            value: 3,
+                            message: "Código deve ter pelo menos 3 caracteres",
+                          },
+                        })}
+                        error={errors.step3?.identificationCode?.message}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -372,47 +426,44 @@ export function StepFour() {
                             value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
                             message: "CPF deve estar no formato 000.000.000-00",
                           },
+                          minLength: {
+                            value: 14,
+                            message: "CPF deve ter 14 caracteres",
+                          },
+                          maxLength: {
+                            value: 14,
+                            message: "CPF deve ter 14 caracteres",
+                          },
                         })}
                         error={errors.step3?.cpf?.message}
                       />
                     </div>
                     <div>
                       <Input
-                        title="Código de Identificação"
+                        title="Telefone"
                         inputClassName="rounded-2xl"
-                        placeholder="Digite seu código de identificação"
-                        {...register("step3.identificationCode", {
-                          required: "Código de identificação é obrigatório",
+                        placeholder="Digite seu telefone"
+                        {...register("step3.phone", {
+                          required: "Telefone é obrigatório",
                         })}
-                        error={errors.step3?.identificationCode?.message}
+                        error={errors.step3?.phone?.message}
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <Input
-                      title="Telefone"
-                      inputClassName="rounded-2xl"
-                      placeholder="Digite seu telefone"
-                      {...register("step3.phone", {
-                        required: "Telefone é obrigatório",
-                      })}
-                      error={errors.step3?.phone?.message}
-                    />
-                  </div>
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 mt-6 md:mt-8">
+
+              <div className="flex flex-col md:flex-row justify-between gap-3 md:gap-0 mt-4 md:mt-6 lg:mt-10">
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="bg-gray-500 hover:bg-gray-600 text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-all duration-200 hover:scale-[1.02] font-semibold text-sm md:text-base order-2 md:order-1"
+                  className="bg-gray-500 text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-transform hover:scale-[1.02] text-sm md:text-base order-2 md:order-1"
                 >
                   Voltar
                 </button>
                 <button
                   type="submit"
-                  className="bg-primary hover:bg-primary/90 text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-all duration-200 hover:scale-[1.02] font-semibold text-sm md:text-base order-1 md:order-2"
+                  className="bg-primary text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-transform hover:scale-[1.02] text-sm md:text-base order-1 md:order-2"
                 >
                   Finalizar
                 </button>

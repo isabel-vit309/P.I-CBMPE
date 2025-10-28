@@ -1,5 +1,5 @@
 // contexts/FormContext.tsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 // 1. Definir as interfaces para os dados de cada step
 interface Step1Data {
@@ -11,14 +11,18 @@ interface Step1Data {
 }
 
 interface Step2Data {
-  description: string;
-  responsible: string;
-  victims: number;
+  caseDescription?: string;
+  resourcesUsed?: string;
+  victimsNumber?: string;
+  occurrenceAddress?: string;
+  finalSituation?: string;
 }
 
 interface Step3Data {
-  matricula: string;
+  name: string;
+  identificationCode: string;
   cpf: string;
+  phone: string;
 }
 
 interface FormData {
@@ -40,35 +44,56 @@ const FormContext = createContext<FormContextType | undefined>(undefined);
 export const FormProvider: React.FC<{ children: any }> = ({ children }) => {
   const [formData, setFormData] = useState<FormData>({
     step1: {
-      occurrenceType: '',
-      responsibleVehicle: '',
-      dateTime: '',
-      groupings: '',
-      locationType: ''
+      occurrenceType: "",
+      responsibleVehicle: "",
+      dateTime: "",
+      groupings: "",
+      locationType: "",
     },
     step2: {
-      description: '',
-      responsible: '',
-      victims: 0
+      caseDescription: "",
+      resourcesUsed: "",
+      victimsNumber: "",
+      occurrenceAddress: "",
+      finalSituation: "",
     },
     step3: {
-      matricula: '',
-      cpf: ''
-    }
+      name: "",
+      identificationCode: "",
+      cpf: "",
+      phone: "",
+    },
   });
 
   const updateFormData = (step: keyof FormData, data: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [step]: data
+      [step]: data,
     }));
   };
 
   const clearFormData = () => {
     setFormData({
-      step1: { occurrenceType: '', responsibleVehicle: '', dateTime: '', groupings: '', locationType: '' },
-      step2: { description: '', responsible: '', victims: 0 },
-      step3: { matricula: '', cpf: '' }
+      step1: {
+        occurrenceType: "",
+        responsibleVehicle: "",
+        dateTime: "",
+        groupings: "",
+        locationType: "",
+      },
+      step2: {
+        caseDescription: "",
+        resourcesUsed: "",
+        victimsNumber: "",
+        occurrenceAddress: "",
+        finalSituation: "",
+      },
+      step3: {
+        name: "",
+        identificationCode: "",
+        cpf: "",
+        phone: "",
+      },
     });
   };
 
@@ -79,11 +104,10 @@ export const FormProvider: React.FC<{ children: any }> = ({ children }) => {
   );
 };
 
-// 4. Hook personalizado
 export const useFormContext = () => {
   const context = useContext(FormContext);
   if (context === undefined) {
-    throw new Error('useFormContext must be used within a FormProvider');
+    throw new Error("useFormContext must be used within a FormProvider");
   }
   return context;
 };

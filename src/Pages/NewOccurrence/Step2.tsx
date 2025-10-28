@@ -7,13 +7,13 @@ import { Sidebar } from "../../Components/Sidebar";
 import { NavLink } from "react-router-dom";
 import { Input } from "../../Components/Input";
 
-interface StepTwoForm {
-  caseDescription: string;
-  resourcesUsed: string;
-  victimsNumber: string;
-  occurrenceAddress: string;
-  finalSituation: string;
-}
+type StepTwoForm = {
+  caseDescription?: string;
+  resourcesUsed?: string;
+  victimsNumber?: string;
+  occurrenceAddress?: string;
+  finalSituation?: string;
+};
 
 export function StepTwo() {
   const navigate = useNavigate();
@@ -27,11 +27,15 @@ export function StepTwo() {
   } = useForm<StepTwoForm>();
 
   useEffect(() => {
-    if (formData.step2) {
-      reset(formData.step2);
-    }
+    const step2Data: StepTwoForm = {
+      caseDescription: formData.step2?.caseDescription || "",
+      resourcesUsed: formData.step2?.resourcesUsed || "",
+      victimsNumber: formData.step2?.victimsNumber || "",
+      occurrenceAddress: formData.step2?.occurrenceAddress || "",
+      finalSituation: formData.step2?.finalSituation || "",
+    };
+    reset(step2Data);
   }, [formData.step2, reset]);
-
   const onSubmit = (data: StepTwoForm) => {
     updateFormData("step2", data);
     navigate("/stepthree");
@@ -42,7 +46,7 @@ export function StepTwo() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
@@ -84,17 +88,17 @@ export function StepTwo() {
 
           <div className="hidden lg:flex mt-9 items-center justify-center px-4">
             <RegisterField stepNumber={1} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={2} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={3} status="inactive" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={4} status="inactive" />
           </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full min-h-[400px] md:min-h-[500px] mt-4 flex justify-center px-2 md:px-4"
+            className="w-full min-h-[400px] md:min-h-[500px] mt-4 flex justify-center px-4 md:px-6 lg:px-8"
           >
             <div className="w-full mt-4 md:mt-8 lg:bg-white lg:rounded-3xl p-3 md:p-4 lg:p-6 xl:p-8 max-w-2xl lg:max-w-4xl lg:shadow-lg">
               <h1 className="font-semibold font-roboto text-lg md:text-xl lg:text-2xl xl:text-3xl">
@@ -102,7 +106,7 @@ export function StepTwo() {
               </h1>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6">
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Descrição do Caso"
                     inputClassName="rounded-2xl"
@@ -122,7 +126,7 @@ export function StepTwo() {
                   />
                 </div>
 
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Recursos Utilizados"
                     inputClassName="rounded-2xl"
@@ -144,7 +148,7 @@ export function StepTwo() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6 lg:mt-8">
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Número de Vítimas"
                     placeholder="Digite a quantidade de vítimas"
@@ -170,7 +174,7 @@ export function StepTwo() {
                   />
                 </div>
 
-                <div>
+                <div className="pb-2 md:pb-0">
                   <Input
                     title="Endereço de Ocorrência"
                     inputClassName="rounded-2xl"
@@ -191,7 +195,7 @@ export function StepTwo() {
                 </div>
               </div>
 
-              <div className="mt-4 md:mt-6 lg:mt-10">
+              <div className="pb-3 mt-7 md:mt-10 lg:mt-10">
                 <Input
                   title="Situação Final"
                   inputClassName="rounded-2xl"

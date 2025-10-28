@@ -2,13 +2,14 @@ import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Components/Sidebar";
 import { Input } from "../Components/Input";
 import { useForm } from "react-hook-form";
+import { Select } from "../Components/Select";
 
 interface RegisterUserData {
   name: string;
   cpf: string;
   email: string;
   codeAcesso: string;
-  function: string;
+  function: string; // ⚠️ CUIDADO: "function" é palavra reservada!
 }
 
 export function RegisterUser() {
@@ -17,6 +18,11 @@ export function RegisterUser() {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterUserData>();
+
+  const Functions = [
+    { value: "Bombeiro", label: "Bombeiro" },
+    { value: "ADMIN", label: "ADMIN" },
+  ];
 
   const onSubmit = (data: RegisterUserData) => {
     console.log(data);
@@ -135,16 +141,18 @@ export function RegisterUser() {
                 />
               </div>
 
+              {/* ✅ SELECT PARA FUNÇÃO ADICIONADO AQUI */}
               <div className="mt-4 md:mt-6 lg:mt-10">
-                <Input
+                <Select
                   title="Função"
                   inputClassName="rounded-2xl"
-                  placeholder="Digite a função"
+                  placeholder="Selecione a função"
+                  options={Functions}
                   {...register("function", {
                     required: "Função é obrigatória",
-                    minLength: {
-                      value: 2,
-                      message: "Função deve ter pelo menos 2 caracteres",
+                    validate: {
+                      required: (value) =>
+                        value !== "" || "Selecione uma função",
                     },
                   })}
                   error={errors.function?.message}

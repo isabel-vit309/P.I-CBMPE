@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { RegisterField } from "../../Components/RegisterField";
 import { useNavigate } from "react-router-dom";
@@ -41,11 +41,11 @@ export function StepThree() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       <Sidebar />
       <div className="flex-1 bg-gray-50">
         <div className="p-0">
-          <h1 className="ml-12 -mt-1.5 lg:ml-0 lg:mt-0 pt-6 pb-2 px-4 md:px-6 text-xl md:text-2xl lg:text-4xl font-bold text-gray-800">
+          <h1 className="ml-12 -mt-1.5 lg:mt-0 lg:ml-0 pt-6 pb-2 px-4 md:px-6 text-xl md:text-2xl lg:text-4xl font-bold text-gray-800">
             Registrar Ocorrência
           </h1>
           <nav className="border-b border-zinc-200 pt-3 flex space-x-3 md:space-x-4 lg:space-x-6 px-4 md:px-6 text-gray-500 overflow-x-auto">
@@ -83,17 +83,17 @@ export function StepThree() {
 
           <div className="hidden lg:flex mt-9 items-center justify-center px-4">
             <RegisterField stepNumber={1} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={2} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={3} status="active" />
-            <div className="border-b border-2 border-black w-32 xl:w-96" />
+            <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={4} status="inactive" />
           </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full min-h-[400px] md:min-h-[500px] mt-4 flex justify-center px-2 md:px-4"
+            className="w-full min-h-[400px] md:min-h-[500px] mt-4 flex justify-center px-4 md:px-6 lg:px-8"
           >
             <div className="w-full mt-4 md:mt-8 lg:bg-white lg:rounded-3xl p-3 md:p-4 lg:p-6 xl:p-8 max-w-2xl lg:max-w-4xl lg:shadow-lg">
               <h1 className="font-semibold font-roboto text-lg md:text-xl lg:text-2xl xl:text-3xl">
@@ -101,7 +101,7 @@ export function StepThree() {
               </h1>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6">
-                <div>
+                <div className="pb-3 md:pb-0">
                   <Input
                     title="Nome"
                     inputClassName="rounded-2xl"
@@ -144,7 +144,7 @@ export function StepThree() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6 lg:mt-8">
-                <div>
+                <div className="pb-3 md:pb-0 mt-3 md:mt-0">
                   <Input
                     title="CPF"
                     placeholder="Digite seu CPF"
@@ -168,7 +168,7 @@ export function StepThree() {
                   />
                 </div>
 
-                <div>
+                <div className="pb-3 mt-2 md:pb-0 md:mt-0">
                   <Input
                     title="Telefone"
                     inputClassName="rounded-2xl"
