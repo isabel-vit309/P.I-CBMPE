@@ -53,6 +53,10 @@ export function Login() {
         (Array.isArray(decoded.roles) ? decoded.roles[0] : decoded.roles) ||
         "";
 
+      if (typeof roleValue !== "string") {
+        roleValue = String(roleValue);
+      }
+
       if (roleValue.startsWith("ROLE_")) {
         roleValue = roleValue.replace("ROLE_", "");
       }
