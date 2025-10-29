@@ -25,4 +25,7 @@ export default defineConfig({
       workbox: {},
     }),
   ],
+  build: {
+    chunkSizeWarningLimit: 1000,
+  },
 });
