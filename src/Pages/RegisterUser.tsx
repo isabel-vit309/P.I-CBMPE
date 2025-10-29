@@ -1,85 +1,106 @@
-// src/pages/RegisterUser.tsx
-
 import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Components/Sidebar";
 import { Input } from "../Components/Input";
 import { useForm } from "react-hook-form";
 import { Select } from "../Components/Select";
 import axios from "axios";
+import { useState } from "react";
 
 interface RegisterUserData {
   name: string;
-  cpf: string;
   email: string;
   codeAcesso: string;
   function: string;
 }
 
 export function RegisterUser() {
-  const role = localStorage.getItem("role");
-  console.log("Role no localStorage:", role);
-
-  // ✅ Verifica a role como "ADMIN", que é o valor salvo no login
-  if (!role || role.toUpperCase() !== "ADMIN") {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <h1 className="text-xl font-semibold text-red-600">
-          Você não tem permissão para acessar esta página.
-        </h1>
-      </div>
-    );
-  }
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<RegisterUserData>();
 
   const Functions = [
-    { value: "Bombeiro", label: "Bombeiro" },
+    { value: "BOMBEIRO", label: "Bombeiro" },
     { value: "ADMIN", label: "ADMIN" },
   ];
 
   const onSubmit = async (data: RegisterUserData) => {
     try {
-      // ✅ Pega o token já limpo do localStorage
-      const token = localStorage.getItem("token")?.trim();
-      console.log("Token enviado no header:", token);
+      setLoading(true);
 
-      if (!token) {
-        alert(
-          "Erro de autenticação: Token não encontrado. Faça login novamente."
-        );
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
+        alert("Token não encontrado. Faça login novamente.");
         return;
       }
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}usuarios`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            // ✅ Garante que o cabeçalho Authorization está formatado corretamente
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      let token = storedToken.replace(/^"|"$/g, "").trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+      const payload = {
+        nome: data.name,
+        email: data.email,
+        senha: data.codeAcesso,
+        roles: [data.function],
+      };
 
-      console.log("Usuário cadastrado:", response.data);
+      console.log("Enviando payload:", payload);
+
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+      const response = await axios.post(`${API_BASE_URL}/usuarios`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Usuário cadastrado com sucesso:", response.data);
       alert("Usuário cadastrado com sucesso!");
+      reset();
     } catch (error: any) {
-      console.error(
-        "Erro ao cadastrar usuário:",
-        error.response?.data || error.message
-      );
-      alert(
-        "Erro ao cadastrar usuário: " +
-          (error.response?.data?.message || error.message)
-      );
+      console.error("Erro detalhado:", error);
+
+      if (error.response) {
+        console.log("Status:", error.response.status);
+        console.log("Data:", error.response.data);
+        console.log("Headers:", error.response.headers);
+
+        if (error.response.status === 401 || error.response.status === 403) {
+          alert("Sessão expirada ou sem permissão. Faça login novamente.");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        } else if (error.response.status === 400) {
+          if (error.response.data?.message?.includes("Email")) {
+            alert("Erro: Este email já está em uso.");
+          } else {
+            alert(
+              "Dados inválidos: " +
+                (error.response.data?.message || "Verifique os campos")
+            );
+          }
+        } else if (error.response.status === 409) {
+          alert("Erro: Este email já está cadastrado no sistema.");
+        } else {
+          alert(
+            "Erro ao cadastrar usuário: " +
+              (error.response.data?.message || error.response.statusText)
+          );
+        }
+      } else if (error.request) {
+        alert("Erro de conexão: Não foi possível contactar o servidor.");
+      } else {
+        alert("Erro: " + error.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       <Sidebar />
@@ -125,15 +146,15 @@ export function RegisterUser() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full flex justify-center p-4 md:p-8 overflow-y-auto"
+          className="w-full min-h-[400px] md:min-h-[500px] mt-4 flex justify-center px-2 md:px-4"
         >
-          <div className="w-full bg-white lg:rounded-3xl p-4 md:p-6 lg:p-8 max-w-3xl md:shadow-none lg:shadow-lg">
-            <h1 className="font-semibold font-roboto text-xl md:text-2xl lg:text-3xl">
-              Dados
+          <div className="w-full mt-4 md:mt-8 lg:bg-white lg:rounded-3xl p-3 md:p-4 lg:p-6 xl:p-8 max-w-2xl lg:max-w-4xl lg:shadow-lg">
+            <h1 className="font-semibold font-roboto text-lg md:text-xl lg:text-2xl xl:text-3xl">
+              Dados do Usuário
             </h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6">
-              <div className="pb-3 lg:pb-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6">
+              <div className="pb-3 md:pb-0">
                 <Input
                   title="Nome Completo"
                   inputClassName="rounded-2xl"
@@ -153,29 +174,12 @@ export function RegisterUser() {
                 />
               </div>
 
-              <div className="pb-3 lg:pb-0">
-                <Input
-                  title="CPF"
-                  inputClassName="rounded-2xl"
-                  placeholder="Digite o CPF"
-                  {...register("cpf", {
-                    required: "CPF é obrigatório",
-                    pattern: {
-                      value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-                      message: "CPF deve estar no formato 000.000.000-00",
-                    },
-                  })}
-                  error={errors.cpf?.message}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6 pb-4">
-              <div className="pb-3 lg:pb-0">
+              <div className="pb-3 md:pb-0">
                 <Input
                   title="Email de acesso"
                   inputClassName="rounded-2xl"
                   placeholder="Digite o email"
+                  type="email"
                   {...register("email", {
                     required: "Email é obrigatório",
                     pattern: {
@@ -186,44 +190,51 @@ export function RegisterUser() {
                   error={errors.email?.message}
                 />
               </div>
-
-              <Input
-                title="Código de Acesso"
-                inputClassName="rounded-2xl"
-                placeholder="Digite o código de acesso"
-                {...register("codeAcesso", {
-                  required: "Código de acesso é obrigatório",
-                  minLength: {
-                    value: 4,
-                    message: "Código deve ter pelo menos 4 caracteres",
-                  },
-                })}
-                error={errors.codeAcesso?.message}
-              />
             </div>
 
-            <div className="mt-4 md:mt-6">
-              <Select
-                title="Função"
-                inputClassName="rounded-2xl"
-                placeholder="Selecione a função"
-                options={Functions}
-                {...register("function", {
-                  required: "Função é obrigatória",
-                  validate: {
-                    required: (value) => value !== "" || "Selecione uma função",
-                  },
-                })}
-                error={errors.function?.message}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 lg:gap-6 mt-4 md:mt-6 lg:mt-8">
+              <div className="pb-3 md:pb-0">
+                <Input
+                  title="Código de Acesso"
+                  inputClassName="rounded-2xl"
+                  placeholder="Digite o código de acesso"
+                  type="password"
+                  {...register("codeAcesso", {
+                    required: "Código de acesso é obrigatório",
+                    minLength: {
+                      value: 4,
+                      message: "Código deve ter pelo menos 4 caracteres",
+                    },
+                  })}
+                  error={errors.codeAcesso?.message}
+                />
+              </div>
+
+              <div className="pb-3 md:pb-0">
+                <Select
+                  title="Função"
+                  inputClassName="rounded-2xl"
+                  placeholder="Selecione a função"
+                  options={Functions}
+                  {...register("function", {
+                    required: "Função é obrigatória",
+                    validate: {
+                      required: (value) =>
+                        value !== "" || "Selecione uma função",
+                    },
+                  })}
+                  error={errors.function?.message}
+                />
+              </div>
             </div>
 
-            <div className="flex justify-center md:justify-end mt-6">
+            <div className="flex justify-center md:justify-end mt-4 md:mt-6 lg:mt-10">
               <button
                 type="submit"
-                className="bg-primary text-white rounded-xl w-full md:w-[150px] h-10 transition-transform hover:scale-[1.02] text-sm md:text-base"
+                disabled={loading}
+                className="bg-primary text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
               >
-                Registrar
+                {loading ? "Registrando..." : "Registrar"}
               </button>
             </div>
           </div>

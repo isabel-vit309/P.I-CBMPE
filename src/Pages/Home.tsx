@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Components/Sidebar";
 import {
@@ -20,44 +21,35 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import axios from "axios";
 
-const data = [
-  { name: "Urbana", value: 67 },
-  { name: "Rural", value: 33 },
-];
+interface Ocorrencia {
+  id: number;
+  roles: string[];
+  viatura: string;
+  grupamento: string;
+  status: string;
+  dataHoraOcorrido: string;
+  dataRegistro: string;
+  regiao: string;
+  descricao: string;
+  recursosUtilizados: string;
+  numeroVitimas: number;
+  enderecoOcorrencia: string;
+  situacaoFinal: string;
+  nome: string;
+  codigoIdentificacao: string;
+  cpf: string;
+  telefone: string;
+}
 
-const COLORS = ["#E10643", "#FFA500"];
-
-const lineData = [
-  { mes: "Jan", ocorrencias: 45 },
-  { mes: "Fev", ocorrencias: 52 },
-  { mes: "Mar", ocorrencias: 68 },
-  { mes: "Abr", ocorrencias: 79 },
-  { mes: "Mai", ocorrencias: 86 },
-  { mes: "Jun", ocorrencias: 94 },
-  { mes: "Jul", ocorrencias: 112 },
-  { mes: "Ago", ocorrencias: 98 },
-  { mes: "Set", ocorrencias: 105 },
-  { mes: "Out", ocorrencias: 120 },
-  { mes: "Nov", ocorrencias: 135 },
-  { mes: "Dez", ocorrencias: 128 },
-];
-
-const barData = [
-  { incidente: "Incêndio Florestal", ocorrencias: 89 },
-  { incidente: "Alagamento", ocorrencias: 67 },
-  { incidente: "Deslizamento", ocorrencias: 54 },
-  { incidente: "Acidente Rodoviário", ocorrencias: 42 },
-  { incidente: "Queda de Árvore", ocorrencias: 38 },
-  { incidente: "Tempestade", ocorrencias: 31 },
-];
-
-const bairrosData = [
-  { bairro: "Vila Torres Galvão", probabilidade: 27.5 },
-  { bairro: "Águas Compridas", probabilidade: 11.2 },
-  { bairro: "Centro", probabilidade: 9.4 },
-  { bairro: "Jardim Paulista", probabilidade: 8.0 },
-  { bairro: "Rio Doce", probabilidade: 7.9 },
+const COLORS = [
+  "#E10643",
+  "#FFA500",
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
 ];
 
 interface CustomTooltipProps {
@@ -70,7 +62,7 @@ const PieCustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-3 border border-gray-200 rounded shadow-lg">
-        <p className="font-semibold">{`${payload[0].name}: ${payload[0].value}%`}</p>
+        <p className="font-semibold">{`${payload[0].name}: ${payload[0].value} ocorrências`}</p>
       </div>
     );
   }
@@ -93,7 +85,7 @@ const BarCustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-3 border border-gray-200 rounded shadow-lg">
-        <p className="font-semibold">{`Incidente: ${label}`}</p>
+        <p className="font-semibold">{`Tipo: ${label}`}</p>
         <p className="text-red-600">{`Ocorrências: ${payload[0].value}`}</p>
       </div>
     );
@@ -102,6 +94,220 @@ const BarCustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 };
 
 export function Home() {
+  const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchOcorrencias = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
+        setError("Token não encontrado. Faça login novamente.");
+        return;
+      }
+
+      let token = storedToken.replace(/^"|"$/g, "").trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+      const response = await axios.get(`${API_BASE_URL}/ocorrencias`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Ocorrências recebidas para dashboard:", response.data);
+      setOcorrencias(response.data);
+    } catch (error: any) {
+      console.error("Erro ao buscar ocorrências:", error);
+      setError("Erro ao carregar dados do dashboard.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processarDadosArea = () => {
+    if (ocorrencias.length === 0) return [{ name: "Sem dados", value: 1 }];
+
+    let urbana = 0;
+    let rural = 0;
+
+    ocorrencias.forEach((ocorrencia) => {
+      if (ocorrencia.regiao === "Urbana") {
+        urbana++;
+      } else if (ocorrencia.regiao === "Rural") {
+        rural++;
+      }
+    });
+
+    return [
+      { name: "Urbana", value: urbana },
+      { name: "Rural", value: rural },
+    ];
+  };
+
+  const processarDadosMensais = () => {
+    if (ocorrencias.length === 0) {
+      return Array.from({ length: 12 }, (_, i) => ({
+        mes: new Date(2024, i).toLocaleString("pt-BR", { month: "short" }),
+        ocorrencias: 0,
+      }));
+    }
+
+    const meses = Array.from({ length: 12 }, (_, i) => ({
+      mes: new Date(2024, i).toLocaleString("pt-BR", { month: "short" }),
+      ocorrencias: 0,
+    }));
+
+    ocorrencias.forEach((ocorrencia) => {
+      try {
+        const data = new Date(ocorrencia.dataHoraOcorrido);
+        const mes = data.getMonth();
+        if (mes >= 0 && mes < 12) {
+          meses[mes].ocorrencias++;
+        }
+      } catch (e) {
+        console.warn("Data inválida:", ocorrencia.dataHoraOcorrido);
+      }
+    });
+
+    return meses;
+  };
+
+  const processarDadosTipos = () => {
+    if (ocorrencias.length === 0) {
+      return [
+        { incidente: "Incêndio", ocorrencias: 0 },
+        { incidente: "Alagamento", ocorrencias: 0 },
+        { incidente: "Deslizamento", ocorrencias: 0 },
+        { incidente: "Acidente Rodoviário", ocorrencias: 0 },
+        { incidente: "Queda de Árvore", ocorrencias: 0 },
+        { incidente: "Tempestade", ocorrencias: 0 },
+      ];
+    }
+
+    const contador: { [key: string]: number } = {};
+
+    ocorrencias.forEach((ocorrencia) => {
+      ocorrencia.roles.forEach((role) => {
+        const tipo = traduzirTipoOcorrencia(role);
+        contador[tipo] = (contador[tipo] || 0) + 1;
+      });
+    });
+
+    return Object.entries(contador)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 6)
+      .map(([incidente, ocorrencias]) => ({ incidente, ocorrencias }));
+  };
+
+  const processarDadosStatus = () => {
+    if (ocorrencias.length === 0) {
+      return [
+        { status: "Pendente", quantidade: 0 },
+        { status: "Em Andamento", quantidade: 0 },
+        { status: "Finalizada", quantidade: 0 },
+      ];
+    }
+
+    const contador: { [key: string]: number } = {
+      PENDENTE: 0,
+      EM_ANDAMENTO: 0,
+      FINALIZADA: 0,
+    };
+
+    ocorrencias.forEach((ocorrencia) => {
+      contador[ocorrencia.status] = (contador[ocorrencia.status] || 0) + 1;
+    });
+
+    return Object.entries(contador).map(([status, quantidade]) => ({
+      status: traduzirStatus(status),
+      quantidade,
+    }));
+  };
+
+  const traduzirTipoOcorrencia = (tipo: string) => {
+    const tipoMap: { [key: string]: string } = {
+      Incendio: "Incêndio",
+      Alagamento: "Alagamento",
+      Deslizamento: "Deslizamento",
+      AcidenteRodoviario: "Acidente Rodoviário",
+      QuedaArvore: "Queda de Árvore",
+      Tempestade: "Tempestade",
+    };
+    return tipoMap[tipo] || tipo;
+  };
+
+  const traduzirStatus = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+      PENDENTE: "Pendente",
+      EM_ANDAMENTO: "Em Andamento",
+      FINALIZADA: "Finalizada",
+    };
+    return statusMap[status] || status;
+  };
+
+  useEffect(() => {
+    fetchOcorrencias();
+  }, []);
+
+  const dadosArea = processarDadosArea();
+  const dadosMensais = processarDadosMensais();
+  const dadosTipos = processarDadosTipos();
+  const dadosStatus = processarDadosStatus();
+
+  const totalOcorrencias = ocorrencias.length;
+  const totalVitimas = ocorrencias.reduce(
+    (total, oc) => total + (oc.numeroVitimas || 0),
+    0
+  );
+
+  const ocorrenciasUrbanas = ocorrencias.filter(
+    (oc) => oc.regiao === "Urbana"
+  ).length;
+  const ocorrenciasRurais = ocorrencias.filter(
+    (oc) => oc.regiao === "Rural"
+  ).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col md:flex-row">
+        <Sidebar />
+        <div className="flex-1 bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Carregando dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col md:flex-row">
+        <Sidebar />
+        <div className="flex-1 bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={fetchOcorrencias}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+            >
+              Tentar Novamente
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <Sidebar />
@@ -110,8 +316,6 @@ export function Home() {
           <h1 className="ml-14 -mt-1.5 lg:mt-0 lg:ml-0 pt-6 pb-2 px-2 text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">
             Dashboard
           </h1>
-
-          {/* NAVEGAÇÃO CORRIGIDA - Sem quebras em mobile */}
           <nav className="border-b border-zinc-200 pt-3 flex gap-4 px-4 text-gray-500 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <NavLink
               to="/home"
@@ -145,34 +349,103 @@ export function Home() {
             </NavLink>
           </nav>
         </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 sm:px-4 py-4">
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total de Ocorrências
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {totalOcorrencias}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 text-lg font-bold">📊</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Área principal dos cards */}
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Ocorrências Urbanas
+                  </p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {ocorrenciasUrbanas}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 text-lg font-bold">🏙️</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Ocorrências Rurais
+                  </p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {ocorrenciasRurais}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-lg font-bold">🌳</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total de Vítimas
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">
+                    {totalVitimas}
+                  </p>
+                </div>
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 text-lg font-bold">👥</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 px-3 sm:px-4 py-4 w-full">
-          {/* Card 1 */}
           <Card className="w-full">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg sm:text-xl mt-4 mb-2">
-                Taxa de danos
+                Distribuição por Área
               </CardTitle>
-
               <div className="flex flex-wrap gap-3 sm:gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-[#E10643]" />
-                  <span className="text-sm font-medium">Urbana</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-[#FFA500]" />
-                  <span className="text-sm font-medium">Rural</span>
-                </div>
+                {dadosArea.map((item, index) => (
+                  <div key={item.name} className="flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded"
+                      style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                    />
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                ))}
               </div>
             </CardHeader>
-
             <CardContent className="flex flex-col items-center">
               <div className="w-full max-w-[250px] sm:max-w-[300px]">
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
                     <Pie
-                      data={data}
+                      data={dadosArea}
                       startAngle={180}
                       endAngle={0}
                       innerRadius={60}
@@ -181,7 +454,7 @@ export function Home() {
                       dataKey="value"
                       labelLine={false}
                     >
-                      {data.map((_, index) => (
+                      {dadosArea.map((_, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}
@@ -192,14 +465,15 @@ export function Home() {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-
               <div className="-mt-12 sm:-mt-16 text-lg sm:text-xl font-bold text-gray-700">
-                67%
+                {dadosArea.length > 0 && dadosArea[0].value > 0
+                  ? `${Math.round(
+                      (dadosArea[0].value / totalOcorrencias) * 100
+                    )}%`
+                  : "0%"}
               </div>
             </CardContent>
           </Card>
-
-          {/* Card 2 */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">
@@ -211,7 +485,7 @@ export function Home() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={lineData}>
+                <LineChart data={dadosMensais}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="mes" tick={{ fontSize: 10 }} />
                   <YAxis tick={{ fontSize: 10 }} />
@@ -228,20 +502,18 @@ export function Home() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          {/* Card 3 */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">
-                Maiores Incidentes
+                Tipos de Ocorrência
               </CardTitle>
               <p className="text-xs sm:text-sm text-gray-500">
-                Tipos de incidentes com maior número de ocorrências
+                Distribuição por tipo de incidente
               </p>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={barData} layout="vertical">
+                <BarChart data={dadosTipos} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
                   <YAxis
@@ -261,19 +533,19 @@ export function Home() {
             </CardContent>
           </Card>
 
-          {/* Card 4 */}
+          {/* Card 4 - Distribuição por Status */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl mb-2 mt-4">
-                Bairros com Mais Incidentes
+                Distribuição por Status
               </CardTitle>
               <p className="text-xs sm:text-sm text-gray-500">
-                Áreas de maior risco na região
+                Situação atual das ocorrências
               </p>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 sm:space-y-4">
-                {bairrosData.map((item, index) => (
+                {dadosStatus.map((item, index) => (
                   <div
                     key={index}
                     className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0 text-sm sm:text-base"
@@ -281,21 +553,19 @@ export function Home() {
                     <div className="flex items-center gap-3">
                       <div
                         className={`w-3 h-3 rounded-full ${
-                          index === 0
-                            ? "bg-red-500"
-                            : index === 1
-                            ? "bg-orange-500"
-                            : index === 2
+                          item.status === "Pendente"
                             ? "bg-yellow-500"
-                            : "bg-gray-300"
+                            : item.status === "Em Andamento"
+                            ? "bg-blue-500"
+                            : "bg-green-500"
                         }`}
                       />
                       <span className="font-medium text-gray-800">
-                        {item.bairro}
+                        {item.status}
                       </span>
                     </div>
-                    <span className="font-bold text-red-600">
-                      {item.probabilidade}%
+                    <span className="font-bold text-gray-600">
+                      {item.quantidade}
                     </span>
                   </div>
                 ))}

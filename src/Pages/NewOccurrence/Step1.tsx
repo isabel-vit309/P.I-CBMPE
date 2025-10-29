@@ -29,6 +29,11 @@ export function StepOne() {
     { value: "Tempestade", label: "Tempestade" },
   ];
 
+  const regionOptions = [
+    { value: "Rural", label: "Rural" },
+    { value: "Urbana", label: "Urbana" },
+  ];
+
   const {
     register,
     handleSubmit,
@@ -198,19 +203,16 @@ export function StepOne() {
               </div>
 
               <div className="mt-6 pb-3 md:pb-0 lg:mt-10">
-                <Input
-                  title="Tipo de Local"
+                <Select
+                  title="Região"
                   inputClassName="rounded-2xl"
-                  placeholder="Informe onde ocorreu o incidente"
+                  placeholder="Selecione a região"
+                  options={regionOptions}
                   {...register("locationType", {
-                    required: "Tipo de local é obrigatório",
-                    minLength: {
-                      value: 3,
-                      message: "Tipo de local deve ter pelo menos 3 caracteres",
-                    },
-                    pattern: {
-                      value: /^[A-Za-zÀ-ÿ0-9\s.,-]+$/,
-                      message: "Tipo de local contém caracteres inválidos",
+                    required: "Região é obrigatória",
+                    validate: {
+                      required: (value) =>
+                        value !== "" || "Selecione uma região",
                     },
                   })}
                   error={errors.locationType?.message}

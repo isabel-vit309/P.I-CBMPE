@@ -6,7 +6,6 @@ import {
   HiOutlineUsers,
   HiOutlineUserAdd,
 } from "react-icons/hi";
-import { UserPen } from "lucide-react";
 import { NavItem } from "./NavItem";
 
 interface NavigationProps {
@@ -39,12 +38,15 @@ export function Navigation({ onItemClick }: NavigationProps) {
         to="/list"
         onClick={onItemClick}
       />
-      <NavItem
-        title="Lista de Usuários"
-        icon={HiOutlineUsers}
-        to="/listusers"
-        onClick={onItemClick}
-      />
+
+      {role === "ADMIN" && (
+        <NavItem
+          title="Lista de Usuários"
+          icon={HiOutlineUsers}
+          to="/listusers"
+          onClick={onItemClick}
+        />
+      )}
 
       {role === "ADMIN" && (
         <NavItem
@@ -59,12 +61,6 @@ export function Navigation({ onItemClick }: NavigationProps) {
         title="Registrar Ocorrências"
         icon={RiFileList3Line}
         to="/new-occurrence"
-        onClick={onItemClick}
-      />
-      <NavItem
-        title="Perfil"
-        icon={UserPen}
-        to="/profile"
         onClick={onItemClick}
       />
     </nav>

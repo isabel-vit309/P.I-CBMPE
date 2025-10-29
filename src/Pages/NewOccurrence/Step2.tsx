@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Sidebar } from "../../Components/Sidebar";
 import { NavLink } from "react-router-dom";
 import { Input } from "../../Components/Input";
+import { Select } from "../../Components/Select";
 
 type StepTwoForm = {
   caseDescription?: string;
@@ -18,6 +19,13 @@ type StepTwoForm = {
 export function StepTwo() {
   const navigate = useNavigate();
   const { updateFormData, formData } = useFormContext();
+
+  // Opções para o select de situação final
+  const situationOptions = [
+    { value: "PENDENTE", label: "Pendente" },
+    { value: "EM_ANDAMENTO", label: "Em Andamento" },
+    { value: "FINALIZADA", label: "Finalizada" },
+  ];
 
   const {
     register,
@@ -36,6 +44,7 @@ export function StepTwo() {
     };
     reset(step2Data);
   }, [formData.step2, reset]);
+
   const onSubmit = (data: StepTwoForm) => {
     updateFormData("step2", data);
     navigate("/stepthree");
@@ -196,21 +205,16 @@ export function StepTwo() {
               </div>
 
               <div className="pb-3 mt-7 md:mt-10 lg:mt-10">
-                <Input
+                <Select
                   title="Situação Final"
                   inputClassName="rounded-2xl"
-                  placeholder="Informe a situação final"
+                  placeholder="Selecione a situação"
+                  options={situationOptions}
                   {...register("finalSituation", {
                     required: "Situação final é obrigatória",
-                    minLength: {
-                      value: 5,
-                      message:
-                        "Situação final deve ter pelo menos 5 caracteres",
-                    },
-                    maxLength: {
-                      value: 300,
-                      message:
-                        "Situação final deve ter no máximo 300 caracteres",
+                    validate: {
+                      required: (value) =>
+                        value !== "" || "Selecione uma situação",
                     },
                   })}
                   error={errors.finalSituation?.message}

@@ -22,7 +22,14 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/list" element={<List />} />
-          <Route path="/listusers" element={<ListUsers />} />
+          <Route
+            path="/listusers"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <ListUsers />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/registeruser"
             element={

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { RegisterField } from "../../Components/RegisterField";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { useFormContext } from "../../Context/ContextRevisao";
 import { Sidebar } from "../../Components/Sidebar";
-import { NavLink } from "react-router-dom";
 import { Input } from "../../Components/Input";
+import axios from "axios";
 
 interface CompleteForm {
   step1: {
@@ -41,28 +41,7 @@ export function StepFour() {
     reset,
     watch,
   } = useForm<CompleteForm>({
-    defaultValues: {
-      step1: formData.step1 || {
-        occurrenceType: "",
-        responsibleVehicle: "",
-        dateTime: "",
-        groupings: "",
-        locationType: "",
-      },
-      step2: formData.step2 || {
-        caseDescription: "",
-        resourcesUsed: "",
-        victimsNumber: "",
-        occurrenceAddress: "",
-        finalSituation: "",
-      },
-      step3: formData.step3 || {
-        name: "",
-        identificationCode: "",
-        cpf: "",
-        phone: "",
-      },
-    },
+    defaultValues: formData,
   });
 
   useEffect(() => {
@@ -75,51 +54,115 @@ export function StepFour() {
   useEffect(() => {
     const savedData = localStorage.getItem("step4_form_data");
     if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      reset(parsedData);
+      try {
+        const parsed = JSON.parse(savedData);
+        reset(parsed);
+      } catch (e) {
+        console.warn("Erro ao ler dados do localStorage:", e);
+      }
     }
   }, [reset]);
 
-  useEffect(() => {
-    reset({
-      step1: formData.step1 || {
-        occurrenceType: "",
-        responsibleVehicle: "",
-        dateTime: "",
-        groupings: "",
-        locationType: "",
-      },
-      step2: formData.step2 || {
-        caseDescription: "",
-        resourcesUsed: "",
-        victimsNumber: "",
-        occurrenceAddress: "",
-        finalSituation: "",
-      },
-      step3: formData.step3 || {
-        name: "",
-        identificationCode: "",
-        cpf: "",
-        phone: "",
-      },
-    });
-  }, [formData, reset]);
+  const onSubmit = async (data: CompleteForm) => {
+    try {
+      updateFormData("step1", data.step1);
+      updateFormData("step2", data.step2);
+      updateFormData("step3", data.step3);
 
-  const onSubmit = (data: CompleteForm) => {
-    updateFormData("step1", data.step1);
-    updateFormData("step2", data.step2);
-    updateFormData("step3", data.step3);
+      const ocorrenciaData = {
+        roles: [data.step1.occurrenceType],
+        viatura: data.step1.responsibleVehicle,
+        grupamento: data.step1.groupings,
+        status: data.step2.finalSituation,
+        dataHoraOcorrido: data.step1.dateTime,
+        regiao: data.step1.locationType,
+        descricao: data.step2.caseDescription,
+        recursosUtilizados: data.step2.resourcesUsed,
+        numeroVitimas: parseInt(data.step2.victimsNumber) || 0,
+        enderecoOcorrencia: data.step2.occurrenceAddress,
+        situacaoFinal: data.step2.finalSituation,
+        nome: data.step3.name,
+        codigoIdentificacao: data.step3.identificationCode,
+        cpf: data.step3.cpf,
+        telefone: data.step3.phone,
+      };
 
-    localStorage.setItem("step4_form_data", JSON.stringify(data));
-    localStorage.setItem("form_review_complete", JSON.stringify(data));
+      console.log("Dados mapeados para o backend:", ocorrenciaData);
 
-    console.log("Dados completos para envio:", data);
-    navigate("/stepfive");
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
+        alert("Sessão expirada. Faça login novamente.");
+        navigate("/login");
+        return;
+      }
+
+      let token = storedToken.replace(/^"|"$/g, "").trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+
+      const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+      const response = await axios.post(
+        `${API_BASE_URL}/ocorrencias`,
+        ocorrenciaData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Resposta do backend:", response.data);
+
+      localStorage.removeItem("step4_form_data");
+      localStorage.removeItem("formData");
+
+      alert("Ocorrência registrada com sucesso!");
+      navigate("/list");
+    } catch (error: any) {
+      console.error("Erro detalhado ao enviar ocorrência:", error);
+
+      if (error.response) {
+        console.log("Status do erro:", error.response.status);
+        console.log("Dados do erro:", error.response.data);
+        console.log("Headers da resposta:", error.response.headers);
+
+        if (error.response.status === 401 || error.response.status === 403) {
+          if (
+            error.response.data?.message?.includes("acesso negado") ||
+            error.response.data?.message?.includes("Access Denied")
+          ) {
+            alert(
+              "Acesso negado. Seu usuário não tem permissão para registrar ocorrências."
+            );
+          } else {
+            alert("Sessão expirada ou token inválido. Faça login novamente.");
+            localStorage.removeItem("token");
+            navigate("/");
+          }
+        } else if (error.response.status === 400) {
+          alert(
+            "Dados inválidos: " +
+              (error.response.data?.message ||
+                "Verifique os campos preenchidos")
+          );
+        } else {
+          alert(
+            "Erro ao registrar ocorrência: " +
+              (error.response.data?.message || error.message)
+          );
+        }
+      } else if (error.request) {
+        alert("Erro de conexão: Não foi possível contactar o servidor.");
+      } else {
+        alert("Erro: " + error.message);
+      }
+    }
   };
 
-  const handleBack = () => {
-    navigate("/stepthree");
-  };
+  const handleBack = () => navigate("/stepthree");
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -170,7 +213,6 @@ export function StepFour() {
             <div className="border-b border-2 border-black flex-1 max-w-[100px] md:max-w-[150px] lg:max-w-[200px]" />
             <RegisterField stepNumber={4} status="active" />
           </div>
-
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="w-full mt-4 flex justify-center px-4 md:px-6 lg:px-8"
@@ -227,24 +269,18 @@ export function StepFour() {
                           validate: {
                             futureDate: (value) => {
                               if (!value) return true;
-                              // Cria a data no formato YYYY-MM-DD para evitar problemas de fuso horário
                               const selectedDate = new Date(
                                 value + "T00:00:00"
                               );
                               const now = new Date();
-                              // Zera a hora da data atual para comparação apenas de dia
                               const today = new Date(
                                 now.getFullYear(),
                                 now.getMonth(),
                                 now.getDate()
                               );
-
-                              // Verifica se a data é válida
                               if (isNaN(selectedDate.getTime())) {
                                 return "Data inválida";
                               }
-
-                              // Verifica se a data não é futura (deve ser menor ou igual a hoje)
                               return (
                                 selectedDate <= today ||
                                 "Data não pode ser futura"
@@ -271,15 +307,14 @@ export function StepFour() {
 
                   <div>
                     <Input
-                      title="Tipo de Local"
+                      title="Região"
                       inputClassName="rounded-2xl"
-                      placeholder="Informe onde ocorreu o incidente"
+                      placeholder="Informe a região do incidente"
                       {...register("step1.locationType", {
-                        required: "Tipo de local é obrigatório",
+                        required: "Região é obrigatória",
                         minLength: {
                           value: 3,
-                          message:
-                            "Tipo de local deve ter pelo menos 3 caracteres",
+                          message: "Região deve ter pelo menos 3 caracteres",
                         },
                       })}
                       error={errors.step1?.locationType?.message}
@@ -287,6 +322,7 @@ export function StepFour() {
                   </div>
                 </div>
               </div>
+
               <div className="mb-6 md:mb-8 p-4 md:p-6 lg:bg-white lg:shadow-lg lg:rounded-2xl">
                 <h1 className="font-semibold font-roboto text-lg md:text-xl lg:text-2xl mb-4 md:mb-6">
                   Dados Complementares
@@ -358,18 +394,11 @@ export function StepFour() {
 
                   <div>
                     <Input
-                      title="Situação Final"
-                      inputClassName="rounded-2xl"
-                      placeholder="Informe a situação final"
-                      {...register("step2.finalSituation", {
-                        required: "Situação final é obrigatória",
-                        minLength: {
-                          value: 5,
-                          message:
-                            "Situação final deve ter pelo menos 5 caracteres",
-                        },
-                      })}
-                      error={errors.step2?.finalSituation?.message}
+                      title="Status"
+                      inputClassName="rounded-2xl bg-gray-100"
+                      value={watch("step2.finalSituation") || ""}
+                      disabled
+                      placeholder="Status será definido pela situação final"
                     />
                   </div>
                 </div>
@@ -461,6 +490,7 @@ export function StepFour() {
                 >
                   Voltar
                 </button>
+
                 <button
                   type="submit"
                   className="bg-primary text-white rounded-xl w-full md:w-[130px] lg:w-[150px] h-10 transition-transform hover:scale-[1.02] text-sm md:text-base order-1 md:order-2"
