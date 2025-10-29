@@ -5,10 +5,18 @@ import { Input } from "../Components/Input";
 import { Whitelogo } from "../Components/WhiteLogo";
 import { authService } from "../Service/authService";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 interface LoginForm {
   email: string;
   senha: string;
+}
+
+interface TokenPayload {
+  sub: string;
+  role?: string | string[];
+  roles?: string | string[];
+  exp: number;
 }
 
 export function Login() {
@@ -37,11 +45,27 @@ export function Login() {
         senha: data.senha,
       });
 
+      const decoded: TokenPayload = jwtDecode(token);
+      console.log("Payload do token:", decoded);
+
+      let roleValue =
+        (Array.isArray(decoded.role) ? decoded.role[0] : decoded.role) ||
+        (Array.isArray(decoded.roles) ? decoded.roles[0] : decoded.roles) ||
+        "";
+
+      if (roleValue.startsWith("ROLE_")) {
+        roleValue = roleValue.replace("ROLE_", "");
+      }
+
       localStorage.setItem("token", token);
+      localStorage.setItem("role", roleValue);
+
       console.log("Login realizado! Token:", token);
+      console.log("Role salva:", roleValue);
+
       navigate("/home");
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Erro ao fazer login");
       console.error("Erro no login:", err);
     } finally {
       setLoading(false);

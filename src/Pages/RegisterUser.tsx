@@ -15,10 +15,9 @@ interface RegisterUserData {
 
 export function RegisterUser() {
   const role = localStorage.getItem("role");
-
   console.log("Role no localStorage:", role);
 
-  if (role !== "ADMIN") {
+  if (!role || role.toUpperCase() !== "ADMIN") {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <h1 className="text-xl font-semibold text-red-600">
