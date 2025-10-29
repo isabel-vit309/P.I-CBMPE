@@ -12,6 +12,7 @@ import { StepFour } from "./Pages/NewOccurrence/Step4";
 import { StepFive } from "./Pages/NewOccurrence/Step5";
 import { RegisterUser } from "./Pages/RegisterUser";
 import { ListUsers } from "./Pages/ListUsers";
+import { ProtectedRoute } from "./Components/ProtectedRoute";
 
 function App() {
   return (
@@ -22,7 +23,14 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/list" element={<List />} />
           <Route path="/listusers" element={<ListUsers />} />
-          <Route path="/registeruser" element={<RegisterUser />} />
+          <Route
+            path="/registeruser"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <RegisterUser />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/new-occurrence" element={<NewOccurrence />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />

@@ -13,6 +13,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ onItemClick }: NavigationProps) {
+  const role = localStorage.getItem("role");
   return (
     <nav className="space-y-0 w-full">
       <NavItem title="Início" icon={GoHome} to="/home" onClick={onItemClick} />
@@ -28,12 +29,14 @@ export function Navigation({ onItemClick }: NavigationProps) {
         to="/listusers"
         onClick={onItemClick}
       />
-      <NavItem
-        title="Registrar usuários"
-        icon={HiOutlineUserAdd}
-        to="/registeruser"
-        onClick={onItemClick}
-      />
+      {role === "ADMIN" && (
+        <NavItem
+          title="Registrar usuários"
+          icon={HiOutlineUserAdd}
+          to="/registeruser"
+          onClick={onItemClick}
+        />
+      )}
       <NavItem
         title="Registrar Ocorrências"
         icon={RiFileList3Line}

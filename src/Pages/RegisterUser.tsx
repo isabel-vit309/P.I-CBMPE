@@ -3,6 +3,7 @@ import { Sidebar } from "../Components/Sidebar";
 import { Input } from "../Components/Input";
 import { useForm } from "react-hook-form";
 import { Select } from "../Components/Select";
+import axios from "axios";
 
 interface RegisterUserData {
   name: string;
@@ -24,9 +25,40 @@ export function RegisterUser() {
     { value: "ADMIN", label: "ADMIN" },
   ];
 
-  const onSubmit = (data: RegisterUserData) => {
-    console.log(data);
+  const onSubmit = async (data: RegisterUserData) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        import.meta.env.VITE_API_URL + "usuarios",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
+      );
+
+      console.log("Usuário cadastrado:", response.data);
+      alert("Usuário cadastrado com sucesso!");
+    } catch (error: any) {
+      console.error(error.response?.data || error.message);
+      alert(
+        "Erro ao cadastrar usuário: " +
+          (error.response?.data?.message || error.message)
+      );
+    }
   };
+  const role = localStorage.getItem("role");
+  if (role !== "ADMIN") {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <h1 className="text-xl font-semibold text-red-600">
+          Você não tem permissão para acessar esta página.
+        </h1>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
