@@ -1,19 +1,35 @@
+import { useEffect, useState } from "react";
 import { GoHome } from "react-icons/go";
 import { RiFileList3Line } from "react-icons/ri";
-import { NavItem } from "./NavItem";
-import { UserPen } from "lucide-react";
 import {
   HiOutlineClipboardList,
   HiOutlineUsers,
   HiOutlineUserAdd,
 } from "react-icons/hi";
+import { UserPen } from "lucide-react";
+import { NavItem } from "./NavItem";
 
 interface NavigationProps {
   onItemClick?: () => void;
 }
 
 export function Navigation({ onItemClick }: NavigationProps) {
-  const role = localStorage.getItem("role");
+  const [role, setRole] = useState(
+    localStorage.getItem("role")?.trim().toUpperCase() || ""
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedRole = localStorage.getItem("role");
+      setRole(storedRole?.trim().toUpperCase() || "");
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    handleStorageChange();
+
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   return (
     <nav className="space-y-0 w-full">
       <NavItem title="Início" icon={GoHome} to="/home" onClick={onItemClick} />
@@ -29,6 +45,7 @@ export function Navigation({ onItemClick }: NavigationProps) {
         to="/listusers"
         onClick={onItemClick}
       />
+
       {role === "ADMIN" && (
         <NavItem
           title="Registrar usuários"
@@ -37,6 +54,7 @@ export function Navigation({ onItemClick }: NavigationProps) {
           onClick={onItemClick}
         />
       )}
+
       <NavItem
         title="Registrar Ocorrências"
         icon={RiFileList3Line}
