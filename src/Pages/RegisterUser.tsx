@@ -14,6 +14,20 @@ interface RegisterUserData {
 }
 
 export function RegisterUser() {
+  const role = localStorage.getItem("role");
+
+  console.log("Role no localStorage:", role);
+
+  if (role !== "ADMIN") {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <h1 className="text-xl font-semibold text-red-600">
+          Você não tem permissão para acessar esta página.
+        </h1>
+      </div>
+    );
+  }
+
   const {
     register,
     handleSubmit,
@@ -49,16 +63,6 @@ export function RegisterUser() {
       );
     }
   };
-  const role = localStorage.getItem("role");
-  if (role !== "ADMIN") {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        <h1 className="text-xl font-semibold text-red-600">
-          Você não tem permissão para acessar esta página.
-        </h1>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
