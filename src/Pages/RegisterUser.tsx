@@ -17,7 +17,8 @@ export function RegisterUser() {
   const role = localStorage.getItem("role");
   console.log("Role no localStorage:", role);
 
-  if (!role || role.toUpperCase() !== "ADMIN") {
+  // ✅ Verifica com ROLE_ADMIN (padrão Spring)
+  if (!role || role.toUpperCase() !== "ROLE_ADMIN") {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <h1 className="text-xl font-semibold text-red-600">
@@ -40,9 +41,11 @@ export function RegisterUser() {
 
   const onSubmit = async (data: RegisterUserData) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token")?.replace(/^"|"$/g, "").trim();
+      console.log("Token enviado no header:", token);
+
       const response = await axios.post(
-        import.meta.env.VITE_API_URL + "usuarios",
+        `${import.meta.env.VITE_API_URL}usuarios`,
         data,
         {
           headers: {
@@ -55,7 +58,10 @@ export function RegisterUser() {
       console.log("Usuário cadastrado:", response.data);
       alert("Usuário cadastrado com sucesso!");
     } catch (error: any) {
-      console.error(error.response?.data || error.message);
+      console.error(
+        "Erro ao cadastrar usuário:",
+        error.response?.data || error.message
+      );
       alert(
         "Erro ao cadastrar usuário: " +
           (error.response?.data?.message || error.message)

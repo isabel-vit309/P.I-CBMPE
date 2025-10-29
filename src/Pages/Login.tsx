@@ -57,8 +57,9 @@ export function Login() {
         roleValue = String(roleValue);
       }
 
-      if (roleValue.startsWith("ROLE_")) {
-        roleValue = roleValue.replace("ROLE_", "");
+      // ✅ Garante formato ROLE_ADMIN (Spring padrão)
+      if (!roleValue.startsWith("ROLE_")) {
+        roleValue = "ROLE_" + roleValue;
       }
 
       localStorage.setItem("token", token);
@@ -83,7 +84,7 @@ export function Login() {
       </div>
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          <h1 className="font-bold text-3xl md:text-4xl mb-8 ">Login</h1>
+          <h1 className="font-bold text-3xl md:text-4xl mb-8">Login</h1>
           {error && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
               {error}
