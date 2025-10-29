@@ -14,8 +14,8 @@ interface LoginForm {
 
 interface TokenPayload {
   sub: string;
-  role?: string | string[];
-  roles?: string | string[];
+  roles?: string[];
+  role?: string[];
   exp: number;
 }
 
@@ -49,8 +49,8 @@ export function Login() {
       console.log("Payload do token:", decoded);
 
       let roleValue =
-        (Array.isArray(decoded.role) ? decoded.role[0] : decoded.role) ||
         (Array.isArray(decoded.roles) ? decoded.roles[0] : decoded.roles) ||
+        (Array.isArray(decoded.role) ? decoded.role[0] : decoded.role) ||
         "";
 
       if (typeof roleValue !== "string") {
@@ -62,7 +62,7 @@ export function Login() {
       }
 
       localStorage.setItem("token", token);
-      localStorage.setItem("role", roleValue);
+      localStorage.setItem("role", roleValue.toUpperCase());
 
       console.log("Login realizado! Token:", token);
       console.log("Role salva:", roleValue);
