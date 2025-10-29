@@ -4,16 +4,18 @@ import { Logo } from "./Logo";
 import { GoPerson } from "react-icons/go";
 import { Navigation } from "../Components/Navigation/Navigation";
 import { IoSearch } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
 export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleSidebar = () => setIsOpen(!isOpen);
+  const closeSidebar = () => setIsOpen(false);
 
-  const closeSidebar = () => {
-    setIsOpen(false);
+  const goToProfile = () => {
+    navigate("/profile");
+    closeSidebar();
   };
 
   return (
@@ -24,6 +26,7 @@ export function Sidebar() {
       >
         <Menu className="w-6 h-6" />
       </button>
+
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 [@media(min-width:1130px)]:hidden"
@@ -50,10 +53,15 @@ export function Sidebar() {
         <div>
           <Logo />
           <div className="flex items-center mt-4 ml-16 space-x-4">
-            <div className="flex w-12 h-12 bg-input rounded-full items-center justify-center text-zinc-500">
+            <button
+              onClick={goToProfile}
+              className="flex w-12 h-12 bg-input rounded-full items-center justify-center text-zinc-500 hover:bg-zinc-200 transition"
+            >
               <GoPerson className="w-6 h-6" />
-            </div>
-            <Settings className="w-6 h-6" />
+            </button>
+            <button className="flex items-center justify-center w-10 h-10 text-zinc-600 hover:text-zinc-800 transition">
+              <Settings className="w-6 h-6" />
+            </button>
           </div>
 
           <div className="relative w-[14rem] ml-0 mt-4 border-b border-zinc-300 bg-input rounded">

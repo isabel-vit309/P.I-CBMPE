@@ -3,7 +3,6 @@ import { RiFileList3Line } from "react-icons/ri";
 import { NavItem } from "./NavItem";
 import { UserPen } from "lucide-react";
 import {
-  HiOutlineCog,
   HiOutlineClipboardList,
   HiOutlineUsers,
   HiOutlineUserAdd,
@@ -45,12 +44,6 @@ export function Navigation({ onItemClick }: NavigationProps) {
         title="Perfil"
         icon={UserPen}
         to="/profile"
-        onClick={onItemClick}
-      />
-      <NavItem
-        title="Configurações"
-        icon={HiOutlineCog}
-        to="/settings"
         onClick={onItemClick}
       />
     </nav>
