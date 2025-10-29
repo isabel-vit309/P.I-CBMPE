@@ -1,3 +1,5 @@
+// src/pages/RegisterUser.tsx
+
 import { NavLink } from "react-router-dom";
 import { Sidebar } from "../Components/Sidebar";
 import { Input } from "../Components/Input";
@@ -17,8 +19,8 @@ export function RegisterUser() {
   const role = localStorage.getItem("role");
   console.log("Role no localStorage:", role);
 
-  // ✅ Verifica com ROLE_ADMIN (padrão Spring)
-  if (!role || role.toUpperCase() !== "ROLE_ADMIN") {
+  // ✅ Verifica a role como "ADMIN", que é o valor salvo no login
+  if (!role || role.toUpperCase() !== "ADMIN") {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <h1 className="text-xl font-semibold text-red-600">
@@ -41,8 +43,16 @@ export function RegisterUser() {
 
   const onSubmit = async (data: RegisterUserData) => {
     try {
-      const token = localStorage.getItem("token")?.replace(/^"|"$/g, "").trim();
+      // ✅ Pega o token já limpo do localStorage
+      const token = localStorage.getItem("token")?.trim();
       console.log("Token enviado no header:", token);
+
+      if (!token) {
+        alert(
+          "Erro de autenticação: Token não encontrado. Faça login novamente."
+        );
+        return;
+      }
 
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}usuarios`,
@@ -50,7 +60,8 @@ export function RegisterUser() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
+            // ✅ Garante que o cabeçalho Authorization está formatado corretamente
+            Authorization: `Bearer ${token}`,
           },
         }
       );

@@ -1,3 +1,5 @@
+// src/pages/Login.tsx
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { MdOutlineRemoveRedEye, MdOutlineVisibilityOff } from "react-icons/md";
@@ -14,8 +16,8 @@ interface LoginForm {
 
 interface TokenPayload {
   sub: string;
-  roles?: string[];
-  role?: string[];
+  roles?: string[] | string;
+  role?: string[] | string;
   exp: number;
 }
 
@@ -40,14 +42,18 @@ export function Login() {
     setError("");
 
     try {
-      const token = await authService.login({
+      const tokenResponse = await authService.login({
         email: data.email,
         senha: data.senha,
       });
 
+      // ✅ Garante que o token seja salvo sem aspas ou espaços extras
+      const token = tokenResponse.replace(/^"|"$/g, "").trim();
+
       const decoded: TokenPayload = jwtDecode(token);
       console.log("Payload do token:", decoded);
 
+      // ✅ Extrai a role de forma flexível (procura em 'roles' e 'role')
       let roleValue =
         (Array.isArray(decoded.roles) ? decoded.roles[0] : decoded.roles) ||
         (Array.isArray(decoded.role) ? decoded.role[0] : decoded.role) ||
@@ -57,16 +63,12 @@ export function Login() {
         roleValue = String(roleValue);
       }
 
-      // ✅ Garante formato ROLE_ADMIN (Spring padrão)
-      if (!roleValue.startsWith("ROLE_")) {
-        roleValue = "ROLE_" + roleValue;
-      }
-
+      // ✅ Salva o token limpo e a role original em maiúsculas (ex: "ADMIN")
       localStorage.setItem("token", token);
       localStorage.setItem("role", roleValue.toUpperCase());
 
-      console.log("Login realizado! Token:", token);
-      console.log("Role salva:", roleValue);
+      console.log("Login realizado! Token salvo:", token);
+      console.log("Role salva:", roleValue.toUpperCase());
 
       navigate("/home");
     } catch (err: any) {
