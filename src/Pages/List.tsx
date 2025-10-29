@@ -4,7 +4,6 @@ import { Sidebar } from "../Components/Sidebar";
 import { Trash2, Filter, X } from "lucide-react";
 import axios from "axios";
 
-// Interface para a ocorrência baseada no seu backend
 interface Ocorrencia {
   id: number;
   roles: string[];
@@ -59,14 +58,10 @@ export function List() {
       const tokenParts = token.split(".");
       if (tokenParts.length === 3) {
         const payload = JSON.parse(atob(tokenParts[1]));
-        console.log("Payload do token:", payload);
         const userRoles = payload.roles || payload.authorities || [];
         const isUserAdmin = userRoles.some(
           (role: string) => role.includes("ADMIN") || role.includes("admin")
         );
-
-        console.log("Roles do usuário:", userRoles);
-        console.log("É admin?", isUserAdmin);
 
         return isUserAdmin;
       }
@@ -339,24 +334,28 @@ export function List() {
             >
               Registrar ocorrência
             </NavLink>
-            <NavLink
-              to="/registeruser"
-              className="font-medium text-sm md:text-base py-3 border-b hover:text-red-600 whitespace-nowrap"
-            >
-              Registrar Usuário
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/registeruser"
+                className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
+              >
+                Registrar Usuário
+              </NavLink>
+            )}
             <NavLink
               to="/list"
               className="font-medium text-sm md:text-base py-3 border-b-2 border-red-600 text-red-600 whitespace-nowrap"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink
-              to="#"
-              className="font-medium text-sm md:text-base py-3 text-red-600 whitespace-nowrap"
-            >
-              Admin
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/list-users"
+                className="font-medium text-sm md:text-base py-3 text-red-600 whitespace-nowrap"
+              >
+                Admin
+              </NavLink>
+            )}
           </nav>
         </div>
         {mostrarFiltros && (
@@ -542,8 +541,6 @@ export function List() {
                         </div>
                       )}
                     </div>
-
-                    {/* Versão Mobile */}
                     <div className="md:hidden space-y-3">
                       <div className="flex justify-between items-center">
                         <div>

@@ -97,6 +97,34 @@ export function Home() {
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const verificarSeUsuarioEhAdmin = () => {
+    try {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) return false;
+
+      let token = storedToken.replace(/^"|"$/g, "").trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+
+      const tokenParts = token.split(".");
+      if (tokenParts.length === 3) {
+        const payload = JSON.parse(atob(tokenParts[1]));
+
+        const userRoles = payload.roles || payload.authorities || [];
+        const isUserAdmin = userRoles.some(
+          (role: string) => role.includes("ADMIN") || role.includes("admin")
+        );
+
+        return isUserAdmin;
+      }
+    } catch (error) {
+      console.error("Erro ao verificar permissões do usuário:", error);
+    }
+    return false;
+  };
 
   const fetchOcorrencias = async () => {
     try {
@@ -254,6 +282,8 @@ export function Home() {
   };
 
   useEffect(() => {
+    const adminStatus = verificarSeUsuarioEhAdmin();
+    setIsAdmin(adminStatus);
     fetchOcorrencias();
   }, []);
 
@@ -329,24 +359,28 @@ export function Home() {
             >
               Registrar ocorrência
             </NavLink>
-            <NavLink
-              to="/registeruser"
-              className="font-medium text-sm py-2 px-1 hover:text-red-600 whitespace-nowrap flex-shrink-0"
-            >
-              Registrar Usuário
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/registeruser"
+                className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
+              >
+                Registrar Usuário
+              </NavLink>
+            )}
             <NavLink
               to="/list"
               className="font-medium text-sm py-2 px-1 hover:text-red-600 whitespace-nowrap flex-shrink-0"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink
-              to="#"
-              className="font-medium text-sm py-2 px-1 text-red-600 whitespace-nowrap flex-shrink-0"
-            >
-              Admin
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/list-users"
+                className="font-medium text-sm py-2 px-1 text-red-600 whitespace-nowrap flex-shrink-0"
+              >
+                Admin
+              </NavLink>
+            )}
           </nav>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 sm:px-4 py-4">
@@ -532,8 +566,6 @@ export function Home() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          {/* Card 4 - Distribuição por Status */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl mb-2 mt-4">

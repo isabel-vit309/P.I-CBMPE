@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RegisterField } from "../../Components/RegisterField";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,32 @@ interface StepThreeForm {
 export function StepThree() {
   const navigate = useNavigate();
   const { updateFormData, formData } = useFormContext();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const verificarSeUsuarioEhAdmin = () => {
+    try {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) return false;
+
+      let token = storedToken.replace(/^"|"$/g, "").trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+      const tokenParts = token.split(".");
+      if (tokenParts.length === 3) {
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const userRoles = payload.roles || payload.authorities || [];
+        const isUserAdmin = userRoles.some(
+          (role: string) => role.includes("ADMIN") || role.includes("admin")
+        );
+
+        return isUserAdmin;
+      }
+    } catch (error) {
+      console.error("Erro ao verificar permissões do usuário:", error);
+    }
+    return false;
+  };
 
   const {
     register,
@@ -29,6 +55,8 @@ export function StepThree() {
     if (formData.step3) {
       reset(formData.step3);
     }
+    const adminStatus = verificarSeUsuarioEhAdmin();
+    setIsAdmin(adminStatus);
   }, [formData.step3, reset]);
 
   const onSubmit = (data: StepThreeForm) => {
@@ -61,24 +89,28 @@ export function StepThree() {
             >
               Registrar ocorrência
             </NavLink>
-            <NavLink
-              to="/registeruser"
-              className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
-            >
-              Registrar Usuário
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/registeruser"
+                className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
+              >
+                Registrar Usuário
+              </NavLink>
+            )}
             <NavLink
               to="/list"
               className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink
-              to="#"
-              className="font-medium text-xs md:text-sm lg:text-base text-red-600 py-3 whitespace-nowrap"
-            >
-              Admin
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/list-users"
+                className="font-medium text-xs md:text-sm lg:text-base text-red-600 py-3 whitespace-nowrap"
+              >
+                Admin
+              </NavLink>
+            )}
           </nav>
 
           <div className="hidden lg:flex mt-9 items-center justify-center px-4">

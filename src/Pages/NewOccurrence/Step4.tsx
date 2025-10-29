@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { RegisterField } from "../../Components/RegisterField";
 import { useNavigate, NavLink } from "react-router-dom";
@@ -33,6 +33,32 @@ interface CompleteForm {
 export function StepFour() {
   const navigate = useNavigate();
   const { formData, updateFormData } = useFormContext();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const verificarSeUsuarioEhAdmin = () => {
+    try {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) return false;
+
+      let token = storedToken.replace(/^"|"$/g, "").trim();
+      if (token.startsWith("Bearer ")) {
+        token = token.slice(7);
+      }
+      const tokenParts = token.split(".");
+      if (tokenParts.length === 3) {
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const userRoles = payload.roles || payload.authorities || [];
+        const isUserAdmin = userRoles.some(
+          (role: string) => role.includes("ADMIN") || role.includes("admin")
+        );
+
+        return isUserAdmin;
+      }
+    } catch (error) {
+      console.error("Erro ao verificar permissões do usuário:", error);
+    }
+    return false;
+  };
 
   const {
     register,
@@ -61,6 +87,8 @@ export function StepFour() {
         console.warn("Erro ao ler dados do localStorage:", e);
       }
     }
+    const adminStatus = verificarSeUsuarioEhAdmin();
+    setIsAdmin(adminStatus);
   }, [reset]);
 
   const onSubmit = async (data: CompleteForm) => {
@@ -119,8 +147,7 @@ export function StepFour() {
       localStorage.removeItem("step4_form_data");
       localStorage.removeItem("formData");
 
-      alert("Ocorrência registrada com sucesso!");
-      navigate("/list");
+      navigate("/stepfive");
     } catch (error: any) {
       console.error("Erro detalhado ao enviar ocorrência:", error);
 
@@ -185,24 +212,28 @@ export function StepFour() {
             >
               Registrar ocorrência
             </NavLink>
-            <NavLink
-              to="/registeruser"
-              className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
-            >
-              Registrar Usuário
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/registeruser"
+                className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
+              >
+                Registrar Usuário
+              </NavLink>
+            )}
             <NavLink
               to="/list"
               className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
             >
               Lista de ocorrências
             </NavLink>
-            <NavLink
-              to="#"
-              className="font-medium text-xs md:text-sm lg:text-base text-red-600 py-3 whitespace-nowrap"
-            >
-              Admin
-            </NavLink>
+            {isAdmin && (
+              <NavLink
+                to="/list-users"
+                className="font-medium text-xs md:text-sm lg:text-base text-red-600 py-3 whitespace-nowrap"
+              >
+                Admin
+              </NavLink>
+            )}
           </nav>
           <div className="hidden lg:flex mt-9 items-center justify-center px-4">
             <RegisterField stepNumber={1} status="active" />
