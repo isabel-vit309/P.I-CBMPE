@@ -1,6 +1,13 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export function Navbar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen grid grid-cols-sidebar">
       <div className="flex-1 bg-gray-50">
@@ -8,7 +15,6 @@ export function Navbar() {
           <h1 className="pt-6 pb-2 px-6 text-4xl font-bold text-gray-800">
             Dashboard
           </h1>
-
           <nav className="border-b border-zinc-200 pt-3 flex space-x-6 px-6 text-gray-500">
             <NavLink
               to="/home"
@@ -34,6 +40,12 @@ export function Navbar() {
             >
               Lista de ocorrências
             </NavLink>
+            <button
+              onClick={handleLogout}
+              className="ml-auto font-medium text-base py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              Logout
+            </button>
           </nav>
         </div>
       </div>

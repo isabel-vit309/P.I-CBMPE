@@ -7,6 +7,7 @@ import {
   HiOutlineUserAdd,
 } from "react-icons/hi";
 import { NavItem } from "./NavItem";
+import { useNavigate } from "react-router-dom";
 
 interface NavigationProps {
   onItemClick?: () => void;
@@ -16,6 +17,7 @@ export function Navigation({ onItemClick }: NavigationProps) {
   const [role, setRole] = useState(
     localStorage.getItem("role")?.trim().toUpperCase() || ""
   );
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -28,6 +30,12 @@ export function Navigation({ onItemClick }: NavigationProps) {
 
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/");
+  };
 
   return (
     <nav className="space-y-0 w-full">
@@ -47,7 +55,6 @@ export function Navigation({ onItemClick }: NavigationProps) {
           onClick={onItemClick}
         />
       )}
-
       {role === "ADMIN" && (
         <NavItem
           title="Registrar usuários"
@@ -56,13 +63,18 @@ export function Navigation({ onItemClick }: NavigationProps) {
           onClick={onItemClick}
         />
       )}
-
       <NavItem
         title="Registrar Ocorrências"
         icon={RiFileList3Line}
         to="/new-occurrence"
         onClick={onItemClick}
       />
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-2 w-full px-4 py-3 text-left text-red-600 font-medium hover:bg-gray-100 rounded-md mt-2"
+      >
+        Sair
+      </button>
     </nav>
   );
 }

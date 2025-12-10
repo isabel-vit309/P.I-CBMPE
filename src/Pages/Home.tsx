@@ -103,21 +103,17 @@ export function Home() {
     try {
       const storedToken = localStorage.getItem("token");
       if (!storedToken) return false;
-
       let token = storedToken.replace(/^"|"$/g, "").trim();
       if (token.startsWith("Bearer ")) {
         token = token.slice(7);
       }
-
       const tokenParts = token.split(".");
       if (tokenParts.length === 3) {
         const payload = JSON.parse(atob(tokenParts[1]));
-
         const userRoles = payload.roles || payload.authorities || [];
         const isUserAdmin = userRoles.some(
           (role: string) => role.includes("ADMIN") || role.includes("admin")
         );
-
         return isUserAdmin;
       }
     } catch (error) {
@@ -130,28 +126,25 @@ export function Home() {
     try {
       setLoading(true);
       setError(null);
-
       const storedToken = localStorage.getItem("token");
       if (!storedToken) {
         setError("Token não encontrado. Faça login novamente.");
         return;
       }
-
       let token = storedToken.replace(/^"|"$/g, "").trim();
       if (token.startsWith("Bearer ")) {
         token = token.slice(7);
       }
-
       const API_BASE_URL = import.meta.env.VITE_API_URL;
-
       const response = await axios.get(`${API_BASE_URL}/ocorrencias`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("Ocorrências recebidas para dashboard:", response.data);
-      setOcorrencias(response.data);
+      // FILTRA OCORRÊNCIAS COM STATUS NULO OU "null"
+      setOcorrencias(
+        response.data.filter(
+          (oc: Ocorrencia) => !!oc.status && oc.status !== "null"
+        )
+      );
     } catch (error: any) {
       console.error("Erro ao buscar ocorrências:", error);
       setError("Erro ao carregar dados do dashboard.");
@@ -162,10 +155,8 @@ export function Home() {
 
   const processarDadosArea = () => {
     if (ocorrencias.length === 0) return [{ name: "Sem dados", value: 1 }];
-
     let urbana = 0;
     let rural = 0;
-
     ocorrencias.forEach((ocorrencia) => {
       if (ocorrencia.regiao === "Urbana") {
         urbana++;
@@ -173,7 +164,6 @@ export function Home() {
         rural++;
       }
     });
-
     return [
       { name: "Urbana", value: urbana },
       { name: "Rural", value: rural },
@@ -187,12 +177,10 @@ export function Home() {
         ocorrencias: 0,
       }));
     }
-
     const meses = Array.from({ length: 12 }, (_, i) => ({
       mes: new Date(2024, i).toLocaleString("pt-BR", { month: "short" }),
       ocorrencias: 0,
     }));
-
     ocorrencias.forEach((ocorrencia) => {
       try {
         const data = new Date(ocorrencia.dataHoraOcorrido);
@@ -204,7 +192,6 @@ export function Home() {
         console.warn("Data inválida:", ocorrencia.dataHoraOcorrido);
       }
     });
-
     return meses;
   };
 
@@ -219,16 +206,13 @@ export function Home() {
         { incidente: "Tempestade", ocorrencias: 0 },
       ];
     }
-
     const contador: { [key: string]: number } = {};
-
     ocorrencias.forEach((ocorrencia) => {
       ocorrencia.roles.forEach((role) => {
         const tipo = traduzirTipoOcorrencia(role);
         contador[tipo] = (contador[tipo] || 0) + 1;
       });
     });
-
     return Object.entries(contador)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 6)
@@ -243,17 +227,14 @@ export function Home() {
         { status: "Finalizada", quantidade: 0 },
       ];
     }
-
     const contador: { [key: string]: number } = {
       PENDENTE: 0,
       EM_ANDAMENTO: 0,
       FINALIZADA: 0,
     };
-
     ocorrencias.forEach((ocorrencia) => {
       contador[ocorrencia.status] = (contador[ocorrencia.status] || 0) + 1;
     });
-
     return Object.entries(contador).map(([status, quantidade]) => ({
       status: traduzirStatus(status),
       quantidade,
@@ -285,6 +266,7 @@ export function Home() {
     const adminStatus = verificarSeUsuarioEhAdmin();
     setIsAdmin(adminStatus);
     fetchOcorrencias();
+    // eslint-disable-next-line
   }, []);
 
   const dadosArea = processarDadosArea();
@@ -297,7 +279,6 @@ export function Home() {
     (total, oc) => total + (oc.numeroVitimas || 0),
     0
   );
-
   const ocorrenciasUrbanas = ocorrencias.filter(
     (oc) => oc.regiao === "Urbana"
   ).length;
@@ -362,7 +343,7 @@ export function Home() {
             {isAdmin && (
               <NavLink
                 to="/registeruser"
-                className="font-medium text-xs md:text-sm lg:text-base py-3 hover:text-red-600 whitespace-nowrap"
+                className="font-medium text-sm py-2 px-1 hover:text-red-600 whitespace-nowrap flex-shrink-0"
               >
                 Registrar Usuário
               </NavLink>
@@ -383,6 +364,8 @@ export function Home() {
             )}
           </nav>
         </div>
+
+        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 sm:px-4 py-4">
           <Card className="bg-white shadow-sm">
             <CardContent className="p-4">
@@ -456,7 +439,10 @@ export function Home() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Gráficos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 px-3 sm:px-4 py-4 w-full">
+          {/* Área */}
           <Card className="w-full">
             <CardHeader className="pb-2">
               <CardTitle className="text-lg sm:text-xl mt-4 mb-2">
@@ -508,6 +494,8 @@ export function Home() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Mensal */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">
@@ -536,6 +524,8 @@ export function Home() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+
+          {/* Tipos */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">
@@ -566,6 +556,8 @@ export function Home() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+
+          {/* Status */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl mb-2 mt-4">

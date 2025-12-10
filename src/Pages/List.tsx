@@ -39,31 +39,31 @@ export function List() {
   const [error, setError] = useState<string | null>(null);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-
   const [filtros, setFiltros] = useState<Filtros>({
     tipo: "",
     regiao: "",
     gravidade: "",
   });
 
+  // Recupera IDs deletados do localStorage
+  const getDeletados = (): number[] => {
+    return JSON.parse(localStorage.getItem("ocorrenciasDeletadas") || "[]");
+  };
+
+  // Verifica se o usuário é admin
   const verificarSeUsuarioEhAdmin = () => {
     try {
       const storedToken = localStorage.getItem("token");
       if (!storedToken) return false;
-
       let token = storedToken.replace(/^"|"$/g, "").trim();
-      if (token.startsWith("Bearer ")) {
-        token = token.slice(7);
-      }
+      if (token.startsWith("Bearer ")) token = token.slice(7);
       const tokenParts = token.split(".");
       if (tokenParts.length === 3) {
         const payload = JSON.parse(atob(tokenParts[1]));
         const userRoles = payload.roles || payload.authorities || [];
-        const isUserAdmin = userRoles.some(
-          (role: string) => role.includes("ADMIN") || role.includes("admin")
+        return userRoles.some((role: string) =>
+          role.toLowerCase().includes("admin")
         );
-
-        return isUserAdmin;
       }
     } catch (error) {
       console.error("Erro ao verificar permissões do usuário:", error);
@@ -71,35 +71,34 @@ export function List() {
     return false;
   };
 
+  // Busca ocorrências do backend e remove as deletadas
   const fetchOcorrencias = async () => {
     try {
       setLoading(true);
       setError(null);
-
       const storedToken = localStorage.getItem("token");
       if (!storedToken) {
         setError("Token não encontrado. Faça login novamente.");
         return;
       }
       let token = storedToken.replace(/^"|"$/g, "").trim();
-      if (token.startsWith("Bearer ")) {
-        token = token.slice(7);
-      }
+      if (token.startsWith("Bearer ")) token = token.slice(7);
 
       const API_BASE_URL = import.meta.env.VITE_API_URL;
-
       const response = await axios.get(`${API_BASE_URL}/ocorrencias`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Ocorrências recebidas:", response.data);
-      setOcorrencias(response.data);
-      setOcorrenciasFiltradas(response.data);
+      // Filtra ocorrências deletadas
+      const deletados = getDeletados();
+      const filtradas = response.data.filter(
+        (oc: Ocorrencia) => !deletados.includes(oc.id)
+      );
+
+      setOcorrencias(filtradas);
+      setOcorrenciasFiltradas(filtradas);
     } catch (error: any) {
       console.error("Erro ao buscar ocorrências:", error);
-
       if (error.response?.status === 401 || error.response?.status === 403) {
         setError("Sessão expirada. Faça login novamente.");
         localStorage.removeItem("token");
@@ -115,6 +114,8 @@ export function List() {
       setLoading(false);
     }
   };
+
+  // Aplica filtros
   const aplicarFiltros = () => {
     let filtered = [...ocorrencias];
     if (filtros.tipo) {
@@ -134,9 +135,9 @@ export function List() {
         (ocorrencia) => getGravidade(ocorrencia.roles) === filtros.gravidade
       );
     }
-
     setOcorrenciasFiltradas(filtered);
   };
+
   const limparFiltros = () => {
     setFiltros({
       tipo: "",
@@ -145,13 +146,13 @@ export function List() {
     });
     setOcorrenciasFiltradas(ocorrencias);
   };
+
   useEffect(() => {
     aplicarFiltros();
   }, [filtros, ocorrencias]);
 
   useEffect(() => {
-    const adminStatus = verificarSeUsuarioEhAdmin();
-    setIsAdmin(adminStatus);
+    setIsAdmin(verificarSeUsuarioEhAdmin());
   }, []);
 
   const tiposUnicos = Array.from(
@@ -161,45 +162,31 @@ export function List() {
     new Set(ocorrencias.map((oc) => oc.regiao))
   ).filter(Boolean);
 
-  const handleDeleteOcorrencia = async (id: number) => {
-    if (!window.confirm("Tem certeza que deseja excluir esta ocorrência?")) {
+  // DELETE apenas no front e "permanente"
+  const handleDeleteFront = (id: number) => {
+    if (
+      !window.confirm(
+        "Tem certeza que deseja remover esta ocorrência da lista?"
+      )
+    )
       return;
-    }
 
-    try {
-      const storedToken = localStorage.getItem("token");
-      if (!storedToken) {
-        alert("Token não encontrado. Faça login novamente.");
-        return;
-      }
+    // Salva no localStorage
+    const deletados = getDeletados();
+    localStorage.setItem(
+      "ocorrenciasDeletadas",
+      JSON.stringify([...deletados, id])
+    );
 
-      let token = storedToken.replace(/^"|"$/g, "").trim();
-      if (token.startsWith("Bearer ")) {
-        token = token.slice(7);
-      }
-
-      const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-      await axios.delete(`${API_BASE_URL}/ocorrencias/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setOcorrencias((prev) => prev.filter((oc) => oc.id !== id));
-      alert("Ocorrência excluída com sucesso!");
-    } catch (error: any) {
-      console.error("Erro ao excluir ocorrência:", error);
-      alert(
-        "Erro ao excluir ocorrência: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
+    // Remove da tela
+    setOcorrencias((prev) => prev.filter((oc) => oc.id !== id));
+    setOcorrenciasFiltradas((prev) => prev.filter((oc) => oc.id !== id));
   };
+
+  // Funções auxiliares
   const formatarData = (dataString: string) => {
     try {
-      const data = new Date(dataString);
-      return data.toLocaleDateString("pt-BR");
+      return new Date(dataString).toLocaleDateString("pt-BR");
     } catch {
       return dataString;
     }
@@ -207,8 +194,7 @@ export function List() {
 
   const formatarHora = (dataString: string) => {
     try {
-      const data = new Date(dataString);
-      return data.toLocaleTimeString("pt-BR", {
+      return new Date(dataString).toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",
       });
@@ -216,6 +202,7 @@ export function List() {
       return dataString;
     }
   };
+
   const getGravidade = (roles: string[]) => {
     const tiposAltaGravidade = [
       "Incendio",
@@ -223,14 +210,10 @@ export function List() {
       "AcidenteRodoviario",
     ];
     const tiposMediaGravidade = ["Alagamento", "Tempestade"];
-
-    if (roles.some((role) => tiposAltaGravidade.includes(role))) {
-      return "Alta";
-    } else if (roles.some((role) => tiposMediaGravidade.includes(role))) {
+    if (roles.some((role) => tiposAltaGravidade.includes(role))) return "Alta";
+    if (roles.some((role) => tiposMediaGravidade.includes(role)))
       return "Média";
-    } else {
-      return "Baixa";
-    }
+    return "Baixa";
   };
 
   const getStatusTraduzido = (status: string) => {
@@ -241,6 +224,7 @@ export function List() {
     };
     return statusMap[status] || status;
   };
+
   const getTipoTraduzido = (tipo: string) => {
     const tipoMap: { [key: string]: string } = {
       Incendio: "Incêndio",
@@ -252,11 +236,12 @@ export function List() {
     };
     return tipoMap[tipo] || tipo;
   };
+
   useEffect(() => {
     fetchOcorrencias();
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
         <Sidebar />
@@ -268,9 +253,8 @@ export function List() {
         </div>
       </div>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
         <Sidebar />
@@ -287,12 +271,10 @@ export function List() {
         </div>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       <Sidebar />
-
       <div className="flex-1 w-full">
         <div className="p-4 md:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -320,7 +302,6 @@ export function List() {
               </button>
             </div>
           </div>
-
           <nav className="border-b border-zinc-200 flex gap-4 md:gap-6 overflow-x-auto text-gray-600">
             <NavLink
               to="/home"
@@ -358,6 +339,7 @@ export function List() {
             )}
           </nav>
         </div>
+
         {mostrarFiltros && (
           <div className="p-4 md:p-6 bg-white border-b border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -377,7 +359,6 @@ export function List() {
                 </button>
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -486,6 +467,7 @@ export function List() {
               <div className="divide-y divide-gray-200">
                 {ocorrenciasFiltradas.map((ocorrencia) => (
                   <div key={ocorrencia.id} className="p-4 hover:bg-gray-50">
+                    {/* Desktop */}
                     <div className="hidden md:flex gap-4 items-center">
                       <span className="flex-1">
                         <p className="font-medium text-gray-900">
@@ -497,6 +479,9 @@ export function List() {
                       </span>
                       <span className="flex-1 text-gray-800">
                         {formatarData(ocorrencia.dataHoraOcorrido)}
+                      </span>
+                      <span className="flex-1 text-gray-800">
+                        {formatarHora(ocorrencia.dataHoraOcorrido)}
                       </span>
                       <span className="flex-1 text-gray-800">
                         {ocorrencia.regiao}
@@ -532,15 +517,16 @@ export function List() {
                       </span>
                       {isAdmin && (
                         <div className="w-10 flex justify-center">
+                          {/* Botão de deletar só no front */}
                           <Trash2
                             className="h-5 w-5 text-gray-400 hover:text-red-500 cursor-pointer"
-                            onClick={() =>
-                              handleDeleteOcorrencia(ocorrencia.id)
-                            }
+                            onClick={() => handleDeleteFront(ocorrencia.id)}
                           />
                         </div>
                       )}
                     </div>
+
+                    {/* Mobile */}
                     <div className="md:hidden space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
@@ -552,11 +538,10 @@ export function List() {
                           </p>
                         </div>
                         {isAdmin && (
+                          // Botão de deletar só no front mobile
                           <Trash2
                             className="h-5 w-5 text-gray-400 hover:text-red-500 cursor-pointer"
-                            onClick={() =>
-                              handleDeleteOcorrencia(ocorrencia.id)
-                            }
+                            onClick={() => handleDeleteFront(ocorrencia.id)}
                           />
                         )}
                       </div>
@@ -599,7 +584,7 @@ export function List() {
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500">Situação:</span>
+                        <span className="text-gray-500">Situação:</span>{" "}
                         <span
                           className={`px-2 py-1 text-xs rounded-full ${
                             ocorrencia.status === "PENDENTE"
