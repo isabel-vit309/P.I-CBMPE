@@ -68,7 +68,7 @@ export function Sidebar() {
             <IoSearch className="absolute left-2 top-2.5 w-5 h-5 text-zinc-600" />
             <input
               type="text"
-              placeholder="Pesquisar por..."
+              placeholder="Pesquisar por.."
               className="w-full pl-9 pr-3 py-2 border-0 bg-transparent text-zinc-900 placeholder-zinc-700 focus:outline-none"
             />
           </div>
