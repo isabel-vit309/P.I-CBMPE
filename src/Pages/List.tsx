@@ -45,12 +45,10 @@ export function List() {
     gravidade: "",
   });
 
-  // Recupera IDs deletados do localStorage
   const getDeletados = (): number[] => {
     return JSON.parse(localStorage.getItem("ocorrenciasDeletadas") || "[]");
   };
 
-  // Verifica se o usuário é admin
   const verificarSeUsuarioEhAdmin = () => {
     try {
       const storedToken = localStorage.getItem("token");
@@ -71,7 +69,6 @@ export function List() {
     return false;
   };
 
-  // Busca ocorrências do backend e remove as deletadas
   const fetchOcorrencias = async () => {
     try {
       setLoading(true);
@@ -115,7 +112,6 @@ export function List() {
     }
   };
 
-  // Aplica filtros
   const aplicarFiltros = () => {
     let filtered = [...ocorrencias];
     if (filtros.tipo) {
@@ -162,7 +158,6 @@ export function List() {
     new Set(ocorrencias.map((oc) => oc.regiao))
   ).filter(Boolean);
 
-  // DELETE apenas no front e "permanente"
   const handleDeleteFront = (id: number) => {
     if (
       !window.confirm(
@@ -170,20 +165,17 @@ export function List() {
       )
     )
       return;
-
-    // Salva no localStorage
+    
     const deletados = getDeletados();
     localStorage.setItem(
       "ocorrenciasDeletadas",
       JSON.stringify([...deletados, id])
     );
 
-    // Remove da tela
     setOcorrencias((prev) => prev.filter((oc) => oc.id !== id));
     setOcorrenciasFiltradas((prev) => prev.filter((oc) => oc.id !== id));
   };
 
-  // Funções auxiliares
   const formatarData = (dataString: string) => {
     try {
       return new Date(dataString).toLocaleDateString("pt-BR");
@@ -517,7 +509,6 @@ export function List() {
                       </span>
                       {isAdmin && (
                         <div className="w-10 flex justify-center">
-                          {/* Botão de deletar só no front */}
                           <Trash2
                             className="h-5 w-5 text-gray-400 hover:text-red-500 cursor-pointer"
                             onClick={() => handleDeleteFront(ocorrencia.id)}
@@ -525,8 +516,6 @@ export function List() {
                         </div>
                       )}
                     </div>
-
-                    {/* Mobile */}
                     <div className="md:hidden space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
