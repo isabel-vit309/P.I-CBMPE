@@ -283,7 +283,6 @@ export function ListUsers() {
             </div>
           ) : (
             <>
-              {/* Barra de Pesquisa */}
               <div className="mb-6">
                 <div className="relative max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -300,8 +299,6 @@ export function ListUsers() {
                   {searchTerm && ` para "${searchTerm}"`}
                 </p>
               </div>
-
-              {/* Lista de Usuários */}
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                 <div className="hidden md:flex bg-red-600 text-white text-sm font-semibold px-6 py-3">
                   <span className="flex-1">Nome</span>
