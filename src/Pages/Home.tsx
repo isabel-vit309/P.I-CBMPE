@@ -139,7 +139,6 @@ export function Home() {
       const response = await axios.get(`${API_BASE_URL}/ocorrencias`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // FILTRA OCORRÊNCIAS COM STATUS NULO OU "null"
       setOcorrencias(
         response.data.filter(
           (oc: Ocorrencia) => !!oc.status && oc.status !== "null"
@@ -266,7 +265,6 @@ export function Home() {
     const adminStatus = verificarSeUsuarioEhAdmin();
     setIsAdmin(adminStatus);
     fetchOcorrencias();
-    // eslint-disable-next-line
   }, []);
 
   const dadosArea = processarDadosArea();
@@ -364,8 +362,6 @@ export function Home() {
             )}
           </nav>
         </div>
-
-        {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 sm:px-4 py-4">
           <Card className="bg-white shadow-sm">
             <CardContent className="p-4">
@@ -384,7 +380,6 @@ export function Home() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="bg-white shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -402,7 +397,6 @@ export function Home() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="bg-white shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -420,7 +414,6 @@ export function Home() {
               </div>
             </CardContent>
           </Card>
-
           <Card className="bg-white shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -439,8 +432,6 @@ export function Home() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Gráficos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4 px-3 sm:px-4 py-4 w-full">
           {/* Área */}
           <Card className="w-full">
@@ -494,8 +485,6 @@ export function Home() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Mensal */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">
@@ -524,8 +513,6 @@ export function Home() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          {/* Tipos */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl">
@@ -556,8 +543,6 @@ export function Home() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          {/* Status */}
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="text-lg sm:text-xl mb-2 mt-4">
